@@ -8,16 +8,48 @@ model Pig
 
 import './farm.gaml'
 
+/**
+ * Pig behaviors table 
+ *---------------------------------------------------
+ * 
+ * ID: Behavior ID
+ * Name: Current behavior
+ * Duration: Remain time before run trigger function
+ * Next: Next behavior
+ * 
+ * --------------------------------------------------
+ * ID | Name    | Duration     | Next
+ * --------------------------------------------------
+ * 0  | relax   | relax_time   | is_go_in: [0, 1]
+ * 1  | go-in   | 0            | 2
+ * 2  | wait    | 0            | is_eat: [2, 3]
+ * 3  | eat     | eat_time     | 4
+ * 4  | go-out  | 0            | 5
+ * 5  | relax   | satiety_time | is_drink: [6, 7]
+ * 6  | drink   | 1            | 7
+ * 7  | relax   | 0            | is_excrete: [8, 0]
+ * 8  | excrete | excrete_time | 0
+*/
+
 species Pig {
     int id;
+    
+    float e;
+    float a;
+    float b;
+    float fi;
     float init_weight;
     float weight;
+    
+    float target_dfi;
+    float target_cfi;
     float dfi;
     float cfi;
-    string current;
+    
+    int excrete;
+    
+    int current;
     int duration;
-    string next;
-    bool excreted;
 
     aspect base {
             draw circle(1.6) color: #pink;
@@ -26,146 +58,232 @@ species Pig {
 
     init {
         location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
-        init_weight <- rnd(20.0, 30.0);
+        
+        e <- 2.72;
+     	a <- rnd(312.0, 328.0);
+     	b <- rnd(0.0011448, 0.0013152);
+     	fi <- 0.0;
+        init_weight <- rnd(20.0, 25.0);
         weight <- init_weight;
-        cfi <- 0.0;
-        excreted <- false;
-        current <- 'relax';
-        duration <- 0;
-        next <- 'go-in';
+        
+        target_dfi <- target_dfi();
+        target_cfi <- target_cfi();
+        dfi <- dfi();
+        cfi <- cfi();
+        
+        excrete <- 0;
+        
+        current <- 0;
+        duration <- relax_time();
     }
 
     reflex update {
     	if(duration = 0) {   		
-	        if(current = 'relax') {
-	        	do relax();
+	        if(current = 0) {
+	        	do is_go_in();
 	        }
-	        else if(current = 'go-in') {
-	        	do go_in();
+	        else if(current = 1) {
+	        	current <- 2;
 	        }
-	        else if(current = 'wait') {
-	        	do wait();
+	        else if(current = 2) {
+	        	do is_eat();
 	        }
-	        else if(current = 'eat') {
-	        	do eat();
+	        else if(current = 3) {
+	        	ask Trough {
+		    		do remove_pig(myself.id);
+		    	}
+		    	
+		    	location <- gate_out;
+	        	
+	        	current <- 4;
 	        }
-	        else if(current = 'go-out') {
-	        	do go_out();
+	        else if(current = 4) {
+	        	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
+	        	
+	        	current <- 5;
+	        	duration <- satiety_time();
 	        }
-	        else if(current = 'drink') {
-	        	do drink();
+	        else if(current = 5) {
+	        	do is_drink();
 	        }
-	        else if(current = 'excrete') {
-	        	do excrete();
+	        else if(current = 6) {
+	        	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
+	        	
+	        	current <- 7;
+	        }
+	        else if(current = 7) {
+	        	do is_excrete();
+	        }
+	        else if(current = 8) {
+	        	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
+	        	
+	        	current <- 0;
+	        	duration <- relax_time();
 	        }
         }
         else {
         	duration <- duration - 1;
         }
-    }
-    
-    action relax {
-    	int hour <- int(mod(cycle, 60 * 24) / 60);
-    	
-    	if(next = 'go-in') {
-	        bool is_hungry <- flip((-0.0007 * hour ^ 4 + 0.0059 * hour ^ 3 + 0.2453 * hour ^ 2 + 0.0173 * hour + 4.0051) / 100);
-	        if(is_hungry) {
-	        	location <- { rnd(40.0, 48.0), rnd(48.0, 56.0) };
-	        	
-	            current <- 'go-in';
-	            duration <- 0;
-	            next <- 'wait';
-	        }
-	        else {
-	        	current <- 'relax';
-	        	duration <- 60;
-	        	next <- 'go-in';
-	        }
-        }
-        else if(next = 'drink') {
-        	location <- { 2.0, rnd(60.0, 95.0) };
+        if(mod(cycle, 60 * 24) = 0) {
+        	weight <- weight();
         	
-        	current <- 'drink';
-        	duration <- 0;
-        	next <- 'relax';
-        }
-        else if(next = 'excrete') {
-        	excreted <- true;
-    		location <- { rnd(10.0, 40.0), rnd(60.0, 95.0) };
-    		
-    		current <- 'excrete';
-        	duration <- 0;
-        	next <- 'relax';
-        }
-        
-        if(hour = 0) {
-        	excreted <- false;
+        	target_dfi <- target_dfi();
+	        target_cfi <- target_cfi();
+	        dfi <- dfi();
+	        cfi <- cfi();
         }
     }
     
-    action go_in {
-    	current <- 'wait';
-    	duration <- 0;
-    	next <- 'eat';
+    /**
+     * DFI, CFI and Weight calculators
+     * *******************************
+     */
+     float target_dfi {
+     	int ts <- 1;
+     	int t <- int(cycle / (60 * 24));
+     	
+     	if(t < ts) {
+     		return (2 + t * 0.5 / ts) with_precision 2;	
+     	}
+     	else {
+     		return 2.5;
+     	}
+     }
+     
+     float target_cfi {
+     	if(length(target_cfi) = 0) {
+     		return target_dfi() with_precision 2;
+     	}
+     	else {
+     		return (target_cfi + target_dfi()) with_precision 2;
+     	}
+     }
+     
+     float resistance {
+     	return 0.0;
+     }
+     
+     float resilience {
+     	return 0.0;
+     }
+     
+     float dfi {
+     	float mean <- target_dfi() * (1 - resistance() + resilience());
+     	return rnd(mean - 0.5, mean + 0.5) with_precision 2;
+     }
+     
+     float cfi {
+     	if(length(cfi) = 0) {
+     		return dfi() with_precision 2;
+     	}
+     	else {
+     		return (cfi + dfi()) with_precision 2;
+     	}
+     }
+     
+     float weight {
+     	return (init_weight + (a * (1 - e ^ (-b * (cfi + fi))))) with_precision 2;
+     }
+    
+    /**
+     * Behavior calculators
+     * ********************
+     */
+    int relax_time {
+    	return 60 - mod(cycle, 60);
     }
     
-    action wait {
+    int eat_time {
+    	return rnd(5, 15);
+    }
+    
+    int satiety_time {
+    	return rnd(5, 10);
+    }
+    
+    int excrete_time {
+    	return rnd(1, 2);
+    }
+    
+    /**
+     * Behavior actions
+     * ****************
+     */
+    action is_go_in {
+    	int hour <- int(mod(cycle, 60 * 24) / 60);
+    	bool is_hungry <- flip((-0.0007 * hour ^ 4 + 0.0059 * hour ^ 3 + 0.2453 * hour ^ 2 + 0.0173 * hour + 4.0051) / 100);	
+    	if(is_hungry) {
+        	location <- { rnd(40.0, 48.0), rnd(48.0, 56.0) };
+            current <- 1;
+            duration <- 0;
+        } else {
+        	current <- 0;
+        	duration <- relax_time();
+        }
+    }
+    
+    action is_eat {
     	ask Trough {
             int index <- add_pig(myself.id);
             if(index = -1) {
-                myself.current <- 'wait';
+                myself.current <- 2;
                 myself.duration <- 0;
-                myself.next <- 'eat';
-            } else {
+            }
+            else {
             	myself.location <- positions[index];
             	
-                myself.current <- 'eat';
-                myself.duration <- rnd(5, 30);
-                myself.next <- 'go-out';
+                myself.current <- 3;
+                myself.duration <- myself.eat_time();
             }
         }
     }
     
-    action eat {
-    	ask Trough {
-    		do remove_pig(myself.id);
-    	}
-    	
-    	location <- gate_out;
-    	
-    	current <- 'go-out';
-    	duration <- 0;
-    	next <- 'relax';
-    }
-    
-    action go_out {
-    	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
-	        	
-    	current <- 'relax';
-    	duration <- rnd(8, 12);
-    	next <- 'drink';
-    }
-    
-    action drink {
-    	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
-    	
-    	if(!excreted and flip(0.5)) {
-    		current <- 'relax';
-    		duration <- rnd(0, 30);
-    		next <- 'excrete';
+    action is_drink {
+    	if(flip(0.5)) {
+    		location <- { 2.0, rnd(60.0, 95.0) };
+    		current <- 6;
+    		duration <- 1;	
     	}
     	else {
-    		current <- 'relax';
-    		duration <- 60 - mod(cycle, 60);
-    		next <- 'go-in';
+    		current <- 7;
+    		duration <- 0;
     	}
     }
     
-    action excrete {
-    	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
-    	
-    	current <- 'relax';
-    	duration <- 60 - mod(cycle, 60);
-    	next <- 'go-in';
+    action is_excrete {
+    	int day <- int(cycle / (60 * 24));
+    	if(flip(0.5) and excrete < day * 3) {
+    		excrete <- excrete + 1;
+    		
+    		location <- { rnd(10.0, 40.0), rnd(60.0, 95.0) };
+    		
+    		current <- 8;
+    		duration <- excrete_time();
+    	}
+    	else {
+    		current <- 0;
+    		duration <- relax_time();
+    	}
     }
+    /* **************** */
+}
+
+species PerturbationPig parent: Pig {
+	float resistance {
+     	int day <- int(cycle / (60 * 24));
+     	if(40 < day and day < 60) {
+     		return 0.3;
+     	}
+     	return 0.0;
+     }
+     
+     float resilience {
+     	float k <- 3.0;
+     	int day <- int(cycle / (60 * 24));
+     	
+     	if(day > 60) {
+     		return (k * (1 - cfi / target_cfi)) with_precision 2;	
+     	}
+     	return 0.0;
+     }
 }

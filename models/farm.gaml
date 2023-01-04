@@ -6,7 +6,7 @@
 
 model Farm
 
-global {
+global {	
 	file background <- image_file("../includes/images/background.png");
 	
 	point gate_out <- { 95.0, 48.0 };
