@@ -7,6 +7,7 @@
 model Pig
 
 import './farm.gaml'
+import './factor.gaml'
 
 /**
  * Pig behaviors table 
@@ -23,7 +24,7 @@ import './farm.gaml'
  * 0  | relax   | relax_time   | is_go_in: [0, 1]
  * 1  | go-in   | 0            | 2
  * 2  | wait    | 0            | is_eat: [2, 3]
- * 3  | eat     | eat_time     | 4
+ * 3  | eat     | eat_time     | is_go_out: [4]
  * 4  | go-out  | 0            | 5
  * 5  | relax   | satiety_time | is_drink: [6, 7]
  * 6  | drink   | 1            | 7
@@ -52,8 +53,8 @@ species Pig {
     int duration;
 
     aspect base {
-            draw circle(1.6) color: #pink;
-            draw string(id) color: #black size: 5;
+        draw circle(1.6) color: #pink;
+        draw string(id) color: #black size: 5;
     }
 
     init {
@@ -89,13 +90,7 @@ species Pig {
 	        	do is_eat();
 	        }
 	        else if(current = 3) {
-	        	ask Trough {
-		    		do remove_pig(myself.id);
-		    	}
-		    	
-		    	location <- gate_out;
-	        	
-	        	current <- 4;
+	        	do is_go_out();
 	        }
 	        else if(current = 4) {
 	        	location <- { rnd(60.0, 95.0), rnd(60.0, 95.0) };
@@ -265,25 +260,81 @@ species Pig {
     		duration <- relax_time();
     	}
     }
+    
+    action is_go_out {
+    	ask Trough {
+    		do remove_pig(myself.id);
+    	}
+    	
+    	location <- gate_out;
+    	
+    	current <- 4;
+    }
     /* **************** */
 }
 
-species PerturbationPig parent: Pig {
+/**
+ * Pig is infected by mycotoxins.
+ */
+species FoodDiseasePig parent: Pig {
+	string is_resilience;
+	
+	init {
+		is_resilience <- 'never';
+	}
+	
+	aspect base {
+        draw circle(1.6) color: is_resilience = 'pending' ? #red : #pink;
+        draw string(id) color: #black size: 5;
+    }
+    
+    /**
+     * Behaviour actions
+     */
+    action is_eat {
+    	ask Trough {
+            int index <- add_pig(myself.id);
+            if(index = -1) {
+                myself.current <- 2;
+                myself.duration <- 0;
+            }
+            else {
+            	myself.location <- positions[index];
+            	
+                myself.current <- 3;
+                myself.duration <- myself.eat_time();
+            }
+        }
+        bool is_infect <- false;
+        loop factor over: Factor {
+        	if (factor.duration > 0) {
+        		is_infect <- true;
+        		break;
+        	}
+        }
+        if(is_infect and is_resilience = 'never') {
+        	is_resilience <- 'pending';
+        }
+        if(!is_infect and is_resilience = 'pending') {
+        	is_resilience <- 'ready';
+        }
+    }
+	
 	float resistance {
-     	int day <- int(cycle / (60 * 24));
-     	if(40 < day and day < 60) {
-     		return 0.3;
-     	}
-     	return 0.0;
-     }
+		float value <- 0.0;
+		if (is_resilience = 'pending') {
+			value <- 0.3;
+		}
+		return value;
+    }
      
      float resilience {
      	float k <- 3.0;
-     	int day <- int(cycle / (60 * 24));
      	
-     	if(day > 60) {
-     		return (k * (1 - cfi / target_cfi)) with_precision 2;	
+     	float value <- 0.0;
+     	if(is_resilience = 'ready') {
+     		value <- (k * (1 - cfi / target_cfi)) with_precision 2;	
      	}
-     	return 0.0;
+     	return value;
      }
 }

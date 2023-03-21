@@ -6,11 +6,13 @@
 
 model Farm
 
+import './factor.gaml'
+
 global {	
 	file background <- image_file("../includes/images/background.png");
 	
 	point gate_out <- { 95.0, 48.0 };
-	list<point> positions <- [{51.0, 22.0}, {59.0, 22.0}, {68.0, 22.0}, {76.0, 22.0}, {85.0, 22.0}];
+	list<point> positions <- [{51.0, 22.0}, {58.5, 22.0}, {68.0, 22.0}, {76.0, 22.0}, {85.0, 22.0}];
 }
 
 grid Background width: 64 height: 64 neighbors: 8 {

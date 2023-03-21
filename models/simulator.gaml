@@ -14,14 +14,13 @@ global {
     	file pigs <- csv_file("../includes/input/pigs.csv", true);
     	
         create Trough number: 1;
+        
         create Pig from: pigs;
-        create PerturbationPig from: pigs;
+        create FoodDiseasePig from: pigs;
     }
     
-    reflex stop {
-    	if(cycle = 60 * 24 * 120) {
-    		do pause;
-    	}
+    reflex stop when: cycle = 60 * 24 * 120 {
+    	do pause;
     }
 }
 
@@ -60,36 +59,40 @@ experiment Normal {
     }
 }
 
-experiment Perturbation {
+experiment FoodDisease {
+	init {
+		create FoodDiseaseFactor number: 1;
+	}
+	
     output {
         display Simulator {
             grid Background lines: #black;
-            species PerturbationPig aspect: base;
+            species FoodDiseasePig aspect: base;
         }
         display CFI refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
-        		loop pig over: PerturbationPig {
+        		loop pig over: FoodDiseasePig {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
         display Weight refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
-        		loop pig over: PerturbationPig {
+        		loop pig over: FoodDiseasePig {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
         display CFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: PerturbationPig[0].cfi;
-        		data 'Target CFI' value: PerturbationPig[0].target_cfi;
+        		data 'CFI' value: FoodDiseasePig[0].cfi;
+        		data 'Target CFI' value: FoodDiseasePig[0].target_cfi;
         	}
         }
         display DFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: PerturbationPig[0].dfi;
-        		data 'Target DFI' value: PerturbationPig[0].target_dfi;
+        		data 'DFI' value: FoodDiseasePig[0].dfi;
+        		data 'Target DFI' value: FoodDiseasePig[0].target_dfi;
         	}
         }
     }
