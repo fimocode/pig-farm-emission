@@ -4,7 +4,7 @@ Simulation of precision feeding systems for swine.
 
 ## Setup
 
-* Download (GAMA)[https://gama-platform.org/]
+* Download [GAMA](https://gama-platform.org/)
 * Create workspace `pig-farm`
 * Create empty project `pig-farm`
 * Exit GAMA
@@ -13,7 +13,7 @@ Simulation of precision feeding systems for swine.
 ```
 git init
 git remote add origin git@gitlab.com:lddtoan/pig-farm.git
-git pull
+git pull origin master
 ```
 
 # Run
