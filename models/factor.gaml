@@ -32,12 +32,30 @@ species Factor {
 	}
 }
 
-species FoodDiseaseFactor {	
-	reflex update when: cycle mod (60 * 24) = 0 and int(cycle / (60 * 24)) = 40 {
-		create Factor number: 5;
-		loop i from: 0 to: 4 {
-			Factor[i].location <- positions[i];	
-			Factor[i].duration <- 10 * 60 * 24;
+species FoodDiseaseFactorDC parent: Factor {	
+	reflex spread when: cycle mod (60 * 24) = 0 and int(cycle / (60 * 24)) = 14 {
+		duration <- 7 * 60 * 24;
+	}
+	
+	bool is_infect(point position) {
+		if(distance_to(position, location) <= 2.0 and duration > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+species FoodDiseaseFactorCD parent: Factor {	
+	reflex spread when: cycle mod (60 * 24) = 0 and int(cycle / (60 * 24)) = 35 {
+		duration <- 7 * 60 * 24;
+	}
+	
+	bool is_infect(point position) {
+		if(distance_to(position, location) <= 2.0 and duration > 0) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

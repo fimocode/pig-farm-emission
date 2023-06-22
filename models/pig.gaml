@@ -64,7 +64,7 @@ species Pig {
      	a <- rnd(312.0, 328.0);
      	b <- rnd(0.0011448, 0.0013152);
      	fi <- 0.0;
-        init_weight <- rnd(20.0, 25.0);
+        init_weight <- rnd(47.5, 52.5);
         weight <- init_weight;
         
         target_dfi <- target_dfi();
@@ -134,14 +134,14 @@ species Pig {
      * *******************************
      */
      float target_dfi {
-     	int ts <- 1;
+     	int ts <- 25;
      	int t <- int(cycle / (60 * 24));
      	
      	if(t < ts) {
-     		return (2 + t * 0.5 / ts) with_precision 2;	
+     		return (2 + t * 1 / ts) with_precision 2;	
      	}
      	else {
-     		return 2.5;
+     		return 3;
      	}
      }
      
@@ -164,7 +164,7 @@ species Pig {
      
      float dfi {
      	float mean <- target_dfi() * (1 - resistance() + resilience());
-     	return rnd(mean - 0.5, mean + 0.5) with_precision 2;
+     	return max(0, rnd(mean - 1, mean + 1)) with_precision 2;
      }
      
      float cfi {
@@ -305,31 +305,46 @@ species FoodDiseasePig parent: Pig {
                 myself.duration <- myself.eat_time();
             }
         }
-        bool is_infect <- false;
-        loop factor over: Factor {
-        	if (factor.duration > 0) {
-        		is_infect <- true;
-        		break;
-        	}
+    }
+    
+     action is_go_out {
+     	if(is_resilience = 'pending') {
+     		is_resilience <- 'ready';
+     	}
+     	
+    	ask FoodDiseaseFactorDC {
+    		bool infected <- is_infect(myself.location);
+	        if(infected) {
+	        	myself.is_resilience <- 'pending';
+	        }
         }
-        if(is_infect and is_resilience = 'never') {
-        	is_resilience <- 'pending';
+        
+        ask FoodDiseaseFactorCD {
+    		bool infected <- is_infect(myself.location);
+	        if(infected) {
+	        	myself.is_resilience <- 'pending';
+	        }
         }
-        if(!is_infect and is_resilience = 'pending') {
-        	is_resilience <- 'ready';
-        }
+    	
+    	ask Trough {
+    		do remove_pig(myself.id);
+    	}
+    	
+    	location <- gate_out;
+    	
+    	current <- 4;
     }
 	
 	float resistance {
 		float value <- 0.0;
 		if (is_resilience = 'pending') {
-			value <- 0.3;
+			value <- 0.77;
 		}
 		return value;
     }
      
      float resilience {
-     	float k <- 3.0;
+     	float k <- 0.33;
      	
      	float value <- 0.0;
      	if(is_resilience = 'ready') {
