@@ -45,3 +45,49 @@ species Trough {
         }
     }
 }
+
+species Config {
+	string scenario;
+	
+	init {
+		scenario <- 'normal';
+	}
+	
+	float resistance {
+		if(scenario = 'dc') {
+			return 0.46;
+		}
+		if (scenario = 'cd') {
+			return 0.42;
+		}
+		if (scenario = 'dd' and int(cycle / (60 * 24)) <= 35) {
+			return 0.46;
+		}
+		if (scenario = 'dd') {
+			return 0.31;
+		}
+		return 0.0;
+	}
+	
+	float resilience {
+		if(scenario = 'dc') {
+			return 0.81;
+		}
+		if (scenario = 'cd') {
+			return 1.59;
+		}
+		if (scenario = 'dd' and int(cycle / (60 * 24)) <= 35) {
+			return 0.90;
+		}
+		if (scenario = 'dd') {
+			return 2.36;
+		}
+		return 0.0;
+	}
+}
+
+species BootVictim {
+	init {
+		location <- {rnd(60.0, 95.0), rnd(60.0, 95.0)};
+	}
+}

@@ -51,6 +51,7 @@ species Pig {
     
     int current;
     int duration;
+    int count;
 
     aspect base {
         draw circle(1.6) color: #pink;
@@ -126,6 +127,8 @@ species Pig {
 	        target_cfi <- target_cfi();
 	        dfi <- dfi();
 	        cfi <- cfi();
+	        
+	        count <- 0;
         }
     }
     
@@ -163,8 +166,11 @@ species Pig {
      }
      
      float dfi {
+     	if(count = 0) {
+     		return 0;
+     	}
      	float mean <- target_dfi() * (1 - resistance() + resilience());
-     	return max(0, rnd(mean - 1, mean + 1)) with_precision 2;
+     	return max(0, rnd(mean - 0.5, mean + 0.5)) with_precision 2;
      }
      
      float cfi {
@@ -229,6 +235,8 @@ species Pig {
             	
                 myself.current <- 3;
                 myself.duration <- myself.eat_time();
+                
+                myself.count <- myself.count + 1;
             }
         }
     }
@@ -278,6 +286,7 @@ species Pig {
  */
 species FoodDiseasePig parent: Pig {
 	string is_resilience;
+	string perturbation;
 	
 	init {
 		is_resilience <- 'never';
@@ -291,22 +300,6 @@ species FoodDiseasePig parent: Pig {
     /**
      * Behaviour actions
      */
-    action is_eat {
-    	ask Trough {
-            int index <- add_pig(myself.id);
-            if(index = -1) {
-                myself.current <- 2;
-                myself.duration <- 0;
-            }
-            else {
-            	myself.location <- positions[index];
-            	
-                myself.current <- 3;
-                myself.duration <- myself.eat_time();
-            }
-        }
-    }
-    
      action is_go_out {
      	if(is_resilience = 'pending') {
      		is_resilience <- 'ready';
@@ -338,13 +331,104 @@ species FoodDiseasePig parent: Pig {
 	float resistance {
 		float value <- 0.0;
 		if (is_resilience = 'pending') {
-			value <- 0.77;
+			ask Config {
+				value <- resistance();
+			}
 		}
 		return value;
     }
      
      float resilience {
-     	float k <- 0.33;
+     	float k <- 0.0;
+     	
+     	ask Config {
+			k <- resilience();
+		}
+     	
+     	float value <- 0.0;
+     	if(is_resilience = 'ready') {
+     		value <- (k * (1 - cfi / target_cfi)) with_precision 2;	
+     	}
+     	return value;
+     }
+}
+
+/**
+ * Pig is infected by ASF.
+ */
+species TransmitDiseasePig parent: Pig {
+	string is_resilience;
+	string perturbation;
+	
+	init {
+		is_resilience <- 'never';
+	}
+	
+	aspect base {
+        draw circle(1.6) color: is_resilience = 'pending' ? #red : #pink;
+        draw string(id) color: #black size: 5;
+    }
+    
+    reflex expose {
+    	if(is_resilience = 'pending') {
+     		is_resilience <- 'ready';
+     	}
+    	
+    	ask TransmitDiseaseFactor {
+    		bool infected <- is_infect(myself);
+    		agent pig <- myself;
+	        if(infected) {
+	        	if(myself.is_resilience = 'never') {
+	        		create TransmitDiseaseFactor number: 1;
+	        		ask TransmitDiseaseFactor[length(TransmitDiseaseFactor) - 1] {
+	        			do infect_to(pig);
+	        		}
+	        	}
+	        	myself.is_resilience <- 'pending';
+	        }
+    	}
+    }
+    
+    action is_go_in {
+    	bool is_sick <- false;
+    	
+    	ask TransmitDiseaseFactor {
+    		is_sick <- is_sick or is_sick(myself);
+    	}
+    	    	
+    	if(!is_sick) {
+    		int hour <- int(mod(cycle, 60 * 24) / 60);
+	    	bool is_hungry <- flip((-0.0007 * hour ^ 4 + 0.0059 * hour ^ 3 + 0.2453 * hour ^ 2 + 0.0173 * hour + 4.0051) / 100);	
+	    	if(is_hungry) {
+	        	location <- { rnd(40.0, 48.0), rnd(48.0, 56.0) };
+	            current <- 1;
+	            duration <- 0;
+	        } else {
+	        	current <- 0;
+	        	duration <- relax_time();
+	        }	
+    	} else {
+    		current <- 0;
+	        duration <- relax_time();
+    	}
+    }
+	
+	float resistance {
+		float value <- 0.0;
+		if (is_resilience = 'pending') {
+			ask Config {
+				value <- resistance();
+			}
+		}
+		return value;
+    }
+     
+     float resilience {
+     	float k <- 0.0;
+     	
+     	ask Config {
+			k <- resilience();
+		}
      	
      	float value <- 0.0;
      	if(is_resilience = 'ready') {
