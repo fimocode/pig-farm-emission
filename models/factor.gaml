@@ -12,8 +12,10 @@ import './farm.gaml'
 
 species Factor {
 	int duration;
+	float e;
 	
 	init {
+		e <- 2.72;
 		duration <- 0;
 	}
 	
@@ -67,7 +69,10 @@ species TransmitDiseaseFactor parent: Factor {
 	}
 	
 	bool is_infect(agent pig) {
-		return (distance_to(pig.location, location) <= 2.0 and incubation = -1 and duration > 0) or victim = pig;
+		if((distance_to(pig.location, location) <= 2.0 and incubation = -1 and duration > 0) or (victim = pig)) {
+			return flip(1 - e ^ -rnd(0.402, 1.85));
+		}
+		return false;
 	}
 	
 	action infect_to(agent pig) {
@@ -91,12 +96,6 @@ species TransmitDiseaseFactor parent: Factor {
 		}
 	}
 	
-	reflex spread {
-		if(incubation >= 0) {
-			incubation <- incubation - 1;
-		}
-	}
-	
 	reflex infect {
 		if(victim != nil) {
 			do follow();
@@ -104,6 +103,10 @@ species TransmitDiseaseFactor parent: Factor {
 	}
 	
 	reflex update {
+		if(incubation >= 0) {
+			incubation <- incubation - 1;
+			duration <- duration - 1;
+		}
 		if(duration > 0 and incubation = -1) {
 			ask Background at_distance(2.0) {
 				self.color <- #lightyellow;
@@ -117,12 +120,10 @@ species TransmitDiseaseFactor parent: Factor {
 		}
 	}
 	
-	reflex remove {
-		if(incubation = -1 and duration = 0) {
-			ask Background at_distance(2.0) {
-				self.color <- rgb(background at { grid_x, grid_y });
-			}
-			do die;
+	reflex remove when: incubation = -1 and duration = 0 {
+		ask Background at_distance(2.0) {
+			self.color <- rgb(background at { grid_x, grid_y });
 		}
+		do die;
 	}
 }

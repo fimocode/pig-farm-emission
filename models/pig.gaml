@@ -166,7 +166,7 @@ species Pig {
      }
      
      float dfi {
-     	if(count = 0) {
+     	if(count = 0 and cycle > 0) {
      		return 0;
      	}
      	float mean <- target_dfi() * (1 - resistance() + resilience());
@@ -286,7 +286,6 @@ species Pig {
  */
 species FoodDiseasePig parent: Pig {
 	string is_resilience;
-	string perturbation;
 	
 	init {
 		is_resilience <- 'never';
@@ -358,18 +357,21 @@ species FoodDiseasePig parent: Pig {
  */
 species TransmitDiseasePig parent: Pig {
 	string is_resilience;
-	string perturbation;
+	bool recovered;
 	
 	init {
 		is_resilience <- 'never';
+		recovered <- false;
 	}
 	
 	aspect base {
-        draw circle(1.6) color: is_resilience = 'pending' ? #red : #pink;
-        draw string(id) color: #black size: 5;
+		if(current != -1) {
+			draw circle(1.6) color: is_resilience = 'pending' ? #red : #pink;
+        	draw string(id) color: #black size: 5;	
+		}
     }
     
-    reflex expose {
+    reflex expose when: current != -1 {
     	if(is_resilience = 'pending') {
      		is_resilience <- 'ready';
      	}
@@ -386,6 +388,13 @@ species TransmitDiseasePig parent: Pig {
 	        	}
 	        	myself.is_resilience <- 'pending';
 	        }
+    	}
+    	
+    	if(is_resilience = 'ready' and !recovered) {
+    		if(flip(0.4)){
+    			current <- -1;
+    		}
+    		recovered <- true;
     	}
     }
     
