@@ -6,124 +6,108 @@
 
 model Factor
 
+import './config.gaml'
 import './farm.gaml'
 
-/* Insert your model definition here */
 
 species Factor {
 	int duration;
-	float e;
+	float size;
+	float b; // transmit rate
 	
 	init {
-		e <- 2.72;
+		b <- 0.0;
+		size <- 0.0;
 		duration <- 0;
 	}
 	
 	reflex update {
 		if(duration > 0) {
-			ask Background at_distance(2.0) {
+			ask Background at_distance(size) {
 				self.color <- #lightyellow;
 			}
 			duration <- duration - 1;
 		}
 		else {
-			ask Background at_distance(2.0) {
+			ask Background at_distance(size) {
 				self.color <- rgb(background at { grid_x, grid_y });
 			}
+			do die;
 		}
+	}
+	
+	bool expose(agent pig) {
+		return flip(1 - e ^ -b) and distance_to(pig.location, location) <= size;
 	}
 }
 
-species FoodDiseaseFactorDC parent: Factor {	
-	reflex spread when: cycle mod (60 * 24) = 0 and int(cycle / (60 * 24)) = 14 {
-		duration <- 7 * 60 * 24;
-	}
-	
-	bool is_infect(point position) {
-		if(distance_to(position, location) <= 2.0 and duration > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-}
-
-species FoodDiseaseFactorCD parent: Factor {	
-	reflex spread when: cycle mod (60 * 24) = 0 and int(cycle / (60 * 24)) = 35 {
-		duration <- 7 * 60 * 24;
-	}
-	
-	bool is_infect(point position) {
-		return distance_to(position, location) <= 2.0 and duration > 0;
-	}
-}
-
-species TransmitDiseaseFactor parent: Factor {
-	int incubation;
-	agent victim;
-	
-	init {
-		incubation <- rnd(5, 15) * 24 * 60;
-		duration <- incubation + rnd(3, 4) * 60 * 24;
-		victim <- nil;
-	}
-	
-	bool is_infect(agent pig) {
-		if((distance_to(pig.location, location) <= 2.0 and incubation = -1 and duration > 0) or (victim = pig)) {
-			return flip(1 - e ^ -rnd(0.402, 1.85));
-		}
-		return false;
-	}
-	
-	action infect_to(agent pig) {
-		victim <- pig;
-	}
-	
-	bool is_expose(agent pig) {
-		return victim = pig;
-	}
-	
-	bool is_sick(agent pig) {
-		return victim = pig and incubation = -1 and duration > 0;
-	}
-	
-	action follow {
-		ask Background at_distance(2.0) {
-			self.color <- rgb(background at { grid_x, grid_y });
-		}
-		ask victim {
-			myself.location <- location;
-		}
-	}
-	
-	reflex infect {
-		if(victim != nil) {
-			do follow();
-		}
-	}
-	
-	reflex update {
-		if(incubation >= 0) {
-			incubation <- incubation - 1;
-			duration <- duration - 1;
-		}
-		if(duration > 0 and incubation = -1) {
-			ask Background at_distance(2.0) {
-				self.color <- #lightyellow;
-			}
-			duration <- duration - 1;
-		}
-		else {
-			ask Background at_distance(2.0) {
-				self.color <- rgb(background at { grid_x, grid_y });
-			}
-		}
-	}
-	
-	reflex remove when: incubation = -1 and duration = 0 {
-		ask Background at_distance(2.0) {
-			self.color <- rgb(background at { grid_x, grid_y });
-		}
-		do die;
-	}
-}
+//
+//species TransmitDiseaseFactor parent: Factor {
+//	int incubation;
+//	agent victim;
+//	
+//	init {
+//		incubation <- rnd(5, 15) * 24 * 60;
+//		duration <- incubation + rnd(3, 4) * 60 * 24;
+//		victim <- nil;
+//	}
+//	
+//	bool is_infect(agent pig) {
+//		if((distance_to(pig.location, location) <= 2.0 and incubation = -1 and duration > 0) or (victim = pig)) {
+//			return flip(1 - e ^ -rnd(0.402, 1.85));
+//		}
+//		return false;
+//	}
+//	
+//	action infect_to(agent pig) {
+//		victim <- pig;
+//	}
+//	
+//	bool is_expose(agent pig) {
+//		return victim = pig;
+//	}
+//	
+//	bool is_sick(agent pig) {
+//		return victim = pig and incubation = -1 and duration > 0;
+//	}
+//	
+//	action follow {
+//		ask Background at_distance(2.0) {
+//			self.color <- rgb(background at { grid_x, grid_y });
+//		}
+//		ask victim {
+//			myself.location <- location;
+//		}
+//	}
+//	
+//	reflex infect {
+//		if(victim != nil) {
+//			do follow();
+//		}
+//	}
+//	
+//	reflex update {
+//		if(incubation >= 0) {
+//			incubation <- incubation - 1;
+//			duration <- duration - 1;
+//		}
+//		if(duration > 0 and incubation = -1) {
+//			ask Background at_distance(2.0) {
+//				self.color <- #lightyellow;
+//			}
+//			duration <- duration - 1;
+//		}
+//		else {
+//			ask Background at_distance(2.0) {
+//				self.color <- rgb(background at { grid_x, grid_y });
+//			}
+//		}
+//	}
+//	
+//	reflex remove when: incubation = -1 and duration = 0 {
+//		ask Background at_distance(2.0) {
+//			self.color <- rgb(background at { grid_x, grid_y });
+//		}
+//		do die;
+//	}
+//}
