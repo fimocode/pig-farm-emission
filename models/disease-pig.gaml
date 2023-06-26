@@ -34,8 +34,8 @@ species DiseasePig parent: Pig {
 	int expose_time;
 	int infect_time;
 	int shed_time;
-	int expose_count;
-	int infect_count;
+	
+	int expose_count_per_day;
 	int recover_count;
 	
 	int max_expose_time;
@@ -56,8 +56,8 @@ species DiseasePig parent: Pig {
 		expose_time <- 0;
 		infect_time <- 0;
 		shed_time <- 0;
-		expose_count <- 0;
-		infect_count <- 0;
+		
+		expose_count_per_day <- 0;
 		recover_count <- 0;
 		
 		max_expose_time <- 0;
@@ -71,13 +71,6 @@ species DiseasePig parent: Pig {
 		
 		k1 <- 0.0;
 		k2 <- 0.0;
-	}
-	
-	action seir_refresh_per_day {
-		if(is_start_of_day()) {
-			expose_count <- 0;	
-			infect_count <- 0;
-		}
 	}
 	
 	aspect base {
@@ -98,9 +91,12 @@ species DiseasePig parent: Pig {
 			draw string(id) color: #black size: 5;
 		}
     }
-    
+	
+	/**
+	 * DFI, CFI and Weights
+	 */
     float resistance {
-		if(expose_count > 0) {
+		if(expose_count_per_day > 0 or seir = 1 or seir = 2) {
 			return k1;
 		}
 		else {
@@ -109,21 +105,24 @@ species DiseasePig parent: Pig {
 	}
 	
 	float resilience {
-		if(recover_count > 0) {
+		if(expose_count_per_day = 0 and recover_count > 0 and (seir = 0 or seir = 3)) {
 			return (k2 * (1 - cfi / target_cfi)) with_precision 2;
 		}
 		else {
 			return super.resilience();
 		}
 	}
+	/*****/
 	
+	/**
+	 * Behaviour actions
+	 */
 	action expose {}
 	
 	action infect {
-		if(is_start_of_day() and (max_expose_time <= expose_time or flip(1 - e ^ -((expose_time / (24 * 60)) / (avg_expose_time / (24 * 60)))))) {
+		if(is_start_of_day() and (max_expose_time <= expose_time or flip(1 - e ^ -(expose_time / avg_expose_time)))) {
 			seir <- 2;
 			expose_time <- 0;
-			infect_count <- infect_count + 1;
 		}
 		else {
 			expose_time <- expose_time + 1;
@@ -131,7 +130,7 @@ species DiseasePig parent: Pig {
 	}
 	
 	action recover {
-		if(is_start_of_day() and (max_infect_time <= infect_time or flip(1 - e ^ -((infect_time / (24 * 60)) / (avg_infect_time * (24 * 60)))))) {
+		if(is_start_of_day() and (max_infect_time <= infect_time or flip(1 - e ^ -(infect_time / avg_infect_time)))) {
 			if(flip(u)) {
 				seir <- 4;
 				current <- 9;
@@ -148,7 +147,7 @@ species DiseasePig parent: Pig {
 	}
 	
 	action shed {
-		if(is_start_of_day() and (max_shed_time <= shed_time or flip(1 - e ^ -((shed_time / (24 * 60)) / (avg_shed_time / (24 * 60)))))) {
+		if(is_start_of_day() and (max_shed_time <= shed_time or flip(1 - e ^ -(shed_time / avg_shed_time)))) {
 			seir <- 0;
 			shed_time <- 0;
 		}
@@ -175,6 +174,12 @@ species DiseasePig parent: Pig {
     		do shed();
     	}
     }
+    
+    action seir_refresh_per_day {
+		if(is_start_of_day()) {
+			expose_count_per_day <- 0;	
+		}
+	}
     /*****/
     
     reflex routine {

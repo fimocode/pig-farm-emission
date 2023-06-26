@@ -6,17 +6,23 @@
 
 model Simulator
 
-import './farm.gaml'
-import './pig.gaml'
+
+import './food-disease-config.gaml'
+import './food-disease-pig.gaml'
+
 
 global {
+	file pigs;
+	
     init {
-    	file pigs <- csv_file("../includes/input/pigs.csv", true);
-    	
-        create Trough number: 1;
-        
-        create Pig from: pigs;
-        create FoodDiseasePig from: pigs;
+    	pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
+    	create FoodDiseasePigDC from: pigs;
+        create Trough number: 5;
+        loop i from: 0 to: 4 {
+        	Trough[i].location <- trough_locs[i];
+        }
+        create FoodDiseaseConfig number: 1;
+        FoodDiseaseConfig[0].day <- 14;
     }
     
     reflex stop when: cycle = 60 * 24 * 55 {
@@ -24,164 +30,36 @@ global {
     }
 }
 
-experiment Normal {
+experiment DC {
     output {
         display Simulator {
             grid Background lines: #black;
-            species Pig aspect: base;
+            species FoodDiseasePigDC aspect: base;
         }
         display CFI refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
-        		loop pig over: Pig {
+        		loop pig over: FoodDiseasePigDC {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
         display Weight refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
-        		loop pig over: Pig {
+        		loop pig over: FoodDiseasePigDC {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
         display CFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: Pig[0].cfi;
-        		data 'Target CFI' value: Pig[0].target_cfi;
+        		data 'CFI' value: FoodDiseasePigDC[0].cfi;
+        		data 'Target CFI' value: FoodDiseasePigDC[0].target_cfi;
         	}
         }
         display DFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: Pig[0].dfi;
-        		data 'Target DFI' value: Pig[0].target_dfi;
-        	}
-        }
-    }
-}
-
-experiment FoodDiseaseDC {
-	init {
-		create FoodDiseaseFactorDC number: 5;
-		loop i from: 0 to: 4 {
-			FoodDiseaseFactorDC[i].location <- positions[i];
-		}
-	}
-	
-    output {
-        display Simulator {
-            grid Background lines: #black;
-            species FoodDiseasePig aspect: base;
-        }
-        display CFI refresh: every((60 * 24)#cycles) {
-        	chart "CFI" type: series {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.cfi;
-        		}
-        	}
-        }
-        display Weight refresh: every((60 * 24)#cycles) {
-        	chart "Weight" type: histogram {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.weight;
-        		}
-        	}
-        }
-        display CFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: FoodDiseasePig[0].cfi;
-        		data 'Target CFI' value: FoodDiseasePig[0].target_cfi;
-        	}
-        }
-        display DFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: FoodDiseasePig[0].dfi;
-        		data 'Target DFI' value: FoodDiseasePig[0].target_dfi;
-        	}
-        }
-    }
-}
-
-experiment FoodDiseaseCD {
-	init {
-		create FoodDiseaseFactorCD number: 5;
-		loop i from: 0 to: 4 {
-			FoodDiseaseFactorCD[i].location <- positions[i];
-		}
-	}
-	
-    output {
-        display Simulator {
-            grid Background lines: #black;
-            species FoodDiseasePig aspect: base;
-        }
-        display CFI refresh: every((60 * 24)#cycles) {
-        	chart "CFI" type: series {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.cfi;
-        		}
-        	}
-        }
-        display Weight refresh: every((60 * 24)#cycles) {
-        	chart "Weight" type: histogram {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.weight;
-        		}
-        	}
-        }
-        display CFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: FoodDiseasePig[0].cfi;
-        		data 'Target CFI' value: FoodDiseasePig[0].target_cfi;
-        	}
-        }
-        display DFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: FoodDiseasePig[0].dfi;
-        		data 'Target DFI' value: FoodDiseasePig[0].target_dfi;
-        	}
-        }
-    }
-}
-
-experiment FoodDiseaseDD {
-	init {
-		create FoodDiseaseFactorDC number: 5;
-		create FoodDiseaseFactorCD number: 5;
-		loop i from: 0 to: 4 {
-			FoodDiseaseFactorDC[i].location <- positions[i];
-			FoodDiseaseFactorCD[i].location <- positions[i];
-		}
-	}
-	
-    output {
-        display Simulator {
-            grid Background lines: #black;
-            species FoodDiseasePig aspect: base;
-        }
-        display CFI refresh: every((60 * 24)#cycles) {
-        	chart "CFI" type: series {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.cfi;
-        		}
-        	}
-        }
-        display Weight refresh: every((60 * 24)#cycles) {
-        	chart "Weight" type: histogram {
-        		loop pig over: FoodDiseasePig {
-        			data string(pig.id) value: pig.weight;
-        		}
-        	}
-        }
-        display CFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: FoodDiseasePig[0].cfi;
-        		data 'Target CFI' value: FoodDiseasePig[0].target_cfi;
-        	}
-        }
-        display DFIPig0 refresh: every((60 * 24)#cycles) {
-        	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: FoodDiseasePig[0].dfi;
-        		data 'Target DFI' value: FoodDiseasePig[0].target_dfi;
+        		data 'DFI' value: FoodDiseasePigDC[0].dfi;
+        		data 'Target DFI' value: FoodDiseasePigDC[0].target_dfi;
         	}
         }
     }

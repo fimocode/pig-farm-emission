@@ -7,8 +7,8 @@
 model Simulator
 
 
-import './food-disease-config.gaml'
-import './food-disease-pig.gaml'
+import './transmit-disease-config.gaml'
+import './transmit-disease-pig.gaml'
 
 
 global {
@@ -16,13 +16,13 @@ global {
 	
     init {
     	pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
-    	create FoodDiseasePigDC from: pigs;
+    	create TransmitDiseasePig from: pigs;
         create Trough number: 5;
         loop i from: 0 to: 4 {
         	Trough[i].location <- trough_locs[i];
         }
-        create FoodDiseaseConfig number: 1;
-        FoodDiseaseConfig[0].day <- 14;
+        create TransmitDiseaseConfig number: 1;
+        TransmitDiseaseConfig[0].day <- 10;
     }
     
     reflex stop when: cycle = 60 * 24 * 55 {
@@ -30,36 +30,36 @@ global {
     }
 }
 
-experiment DC {
+experiment Transmit {
     output {
         display Simulator {
             grid Background lines: #black;
-            species FoodDiseasePigDC aspect: base;
+            species TransmitDiseasePig aspect: base;
         }
         display CFI refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
-        		loop pig over: FoodDiseasePigDC {
+        		loop pig over: TransmitDiseasePig {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
         display Weight refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
-        		loop pig over: FoodDiseasePigDC {
+        		loop pig over: TransmitDiseasePig {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
         display CFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
-        		data 'CFI' value: FoodDiseasePigDC[0].cfi;
-        		data 'Target CFI' value: FoodDiseasePigDC[0].target_cfi;
+        		data 'CFI' value: TransmitDiseasePig[0].cfi;
+        		data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
         	}
         }
         display DFIPig0 refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
-        		data 'DFI' value: FoodDiseasePigDC[0].dfi;
-        		data 'Target DFI' value: FoodDiseasePigDC[0].target_dfi;
+        		data 'DFI' value: TransmitDiseasePig[0].dfi;
+        		data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
         	}
         }
     }

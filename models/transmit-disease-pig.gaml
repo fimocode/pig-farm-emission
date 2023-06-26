@@ -31,15 +31,15 @@ species TransmitDiseasePig parent: DiseasePig {
 		
 		u <- 0.4;
 		
-		k1 <- 0.46;
-		k2 <- 0.81;
+		k1 <- 0.42;
+		k2 <- 1.59;
 	}
 	
 	action expose {
 		ask TransmitDiseaseFactor {
 			if(expose(myself)) {
 				myself.seir <- 1;
-				myself.expose_count <- myself.expose_count + 1;
+				myself.expose_count_per_day <- myself.expose_count_per_day + 1;
 			}
 		}
 	}

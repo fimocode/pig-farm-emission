@@ -21,7 +21,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 	 * Util functions
 	 */
 	bool is_hungry {
-		if(expose_count > 0) {
+		if(expose_count_per_day > 0) {
 			return flip(0.5) and super.is_hungry();	
 		}
 		else {
@@ -34,7 +34,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 	}
 	
 	int get_excrete_per_day {
-		if(expose_count > 0) {
+		if(expose_count_per_day > 0) {
 			return rnd(4, 6);
 		}
 		else {
@@ -51,7 +51,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 			ask FoodDiseaseFactor {
 				if(expose(myself)) {
 					myself.seir <- 1;
-					myself.expose_count <- myself.expose_count + 1;
+					myself.expose_count_per_day <- myself.expose_count_per_day + 1;
 				}
 			}	
 		}
@@ -61,6 +61,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 		if(is_start_of_day() and (max_expose_time <= expose_time or flip(1 - e ^ -((expose_time / (24 * 60)) / (avg_expose_time / (24 * 60)))))) {
 			seir <- 0;
 			expose_time <- 0;
+			recover_count <- recover_count + 1;
 		}
 		else {
 			expose_time <- expose_time + 1;
