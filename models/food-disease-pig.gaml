@@ -67,6 +67,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 			expose_time <- expose_time + 1;
 		}
 	}
+	/*****/
 }
 
 

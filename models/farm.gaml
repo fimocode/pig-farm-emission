@@ -16,9 +16,3 @@ global {
 grid Background width: 64 height: 64 neighbors: 8 {
 	rgb color <- rgb(background at { grid_x, grid_y });
 }
-
-//species BootVictim {
-//	init {
-//		location <- {rnd(60.0, 95.0), rnd(60.0, 95.0)};
-//	}
-//}
