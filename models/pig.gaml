@@ -9,6 +9,7 @@ model Pig
 
 import './config.gaml'
 import './trough.gaml'
+import './farm.gaml'
 
 /**
  * Pig behaviors table 
@@ -100,7 +101,7 @@ species Pig {
     }
     
     point get_drink_loc {
-    	return { 2.0, rnd(60.0, 95.0) };
+    	return water_locs[rnd(length(water_locs) - 1)];
     }
     
     point get_excrete_loc {

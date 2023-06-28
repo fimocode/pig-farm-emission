@@ -93,7 +93,7 @@ species DiseasePig parent: Pig {
     }
 	
 	/**
-	 * DFI, CFI and Weights
+	 * DFI, CFI and Weight
 	 */
     float resistance {
 		if(expose_count_per_day > 0 or seir = 1 or seir = 2) {

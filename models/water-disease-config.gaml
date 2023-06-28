@@ -18,11 +18,11 @@ species WaterDiseaseConfig {
 	}
 	
 	reflex spread when: cycle mod (24 * 60) = 0 and int(cycle / (60 * 24)) = day {
-		create WaterDiseaseFactor number: 5;
-		loop i from: 0 to: 4 {
-			WaterDiseaseFactor[i].duration <- 7 * 24 * 60;
+		create WaterDiseaseFactor number: 4;
+		loop i from: 0 to: 3 {
+			WaterDiseaseFactor[i].duration <- 14 * 24 * 60;
 			WaterDiseaseFactor[i].size <- 2.0;
-			WaterDiseaseFactor[i].location <- trough_locs[i];
+			WaterDiseaseFactor[i].location <- water_locs[i];
 		}
 	}
 }

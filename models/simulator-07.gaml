@@ -17,7 +17,7 @@ global {
 	
     init {
     	pigs <- csv_file("../includes/input/multi-disease-pigs.csv", true);
-    	create FoodWaterDiseasePig number: 1;
+    	create FoodWaterDiseasePig from: pigs;
     	FoodWaterDiseasePig[0].id <- 0;
         create Trough number: 5;
         loop i from: 0 to: 4 {
