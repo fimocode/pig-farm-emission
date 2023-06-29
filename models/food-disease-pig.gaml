@@ -30,7 +30,7 @@ species FoodDiseasePigCC parent: DiseasePig {
 	}
 	
 	float get_init_weight {
-		return rnd(47.5, 52.5);
+		return rnd(47.5, 52.5) with_precision 2;
 	}
 	
 	int get_excrete_per_day {

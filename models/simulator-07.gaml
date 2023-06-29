@@ -34,7 +34,7 @@ global {
     }
 }
 
-experiment MultiDisease {
+experiment Multi {
     output {
         display Simulator {
             grid Background lines: #black;
@@ -66,5 +66,26 @@ experiment MultiDisease {
         		data 'Target DFI' value: FoodWaterDiseasePig[0].target_dfi;
         	}
         }
+    }
+    
+    reflex log when: mod(cycle, 24 * 60) = 0 {
+    	ask simulations {
+    		loop pig over: FoodWaterDiseasePig {
+    			save [
+    				floor(cycle / (24 * 60)),
+    				pig.id,
+    				pig.target_dfi,
+    				pig.dfi,
+    				pig.target_cfi,
+    				pig.cfi,
+    				pig.weight,
+    				pig.eat_count,
+    				pig.excrete_each_day,
+    				pig.excrete_count,
+    				pig.expose_count_per_day,
+    				pig.recover_count
+    			] to: "../includes/output/multi/" + string(pig.id) + ".csv" rewrite: false type: "csv";	
+    		}
+		}		
     }
 }

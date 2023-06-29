@@ -60,4 +60,25 @@ experiment CC {
         	}
         }
     }
+    
+    reflex log when: mod(cycle, 24 * 60) = 0 {
+    	ask simulations {
+    		loop pig over: FoodDiseasePigCC {
+    			save [
+    				floor(cycle / (24 * 60)),
+    				pig.id,
+    				pig.target_dfi,
+    				pig.dfi,
+    				pig.target_cfi,
+    				pig.cfi,
+    				pig.weight,
+    				pig.eat_count,
+    				pig.excrete_each_day,
+    				pig.excrete_count,
+    				pig.expose_count_per_day,
+    				pig.recover_count
+    			] to: "../includes/output/cc/" + string(pig.id) + ".csv" rewrite: false type: "csv";	
+    		}
+		}		
+    }
 }

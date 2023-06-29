@@ -35,6 +35,10 @@ species TransmitDiseasePig parent: DiseasePig {
 		k2 <- 1.59;
 	}
 	
+	float get_init_weight {
+		return rnd(47.5, 52.5) with_precision 2;
+	}
+	
 	action expose {
 		ask TransmitDiseaseFactor {
 			if(expose(myself)) {

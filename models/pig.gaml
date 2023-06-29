@@ -134,7 +134,7 @@ species Pig {
     }
     
     float get_init_weight {
-    	return rnd(20.0, 25.0);
+    	return rnd(20.0, 25.0) with_precision 2;
     }
     /*****/
     

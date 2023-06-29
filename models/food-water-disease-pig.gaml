@@ -33,10 +33,6 @@ species AbstractFoodDiseasePig parent: AbstractDiseasePig {
 		}
 	}
 	
-	float get_init_weight {
-		return rnd(47.5, 52.5);
-	}
-	
 	int get_excrete_per_day {
 		if(expose_count_per_day > 0) {
 			return rnd(4, 6);
@@ -96,10 +92,6 @@ species AbstractWaterDiseasePig parent: AbstractDiseasePig {
 		}
 	}
 	
-	float get_init_weight {
-		return rnd(47.5, 52.5);
-	}
-	
 	int get_excrete_per_day {
 		if(expose_count_per_day > 0) {
 			return rnd(4, 6);
@@ -146,4 +138,12 @@ species FoodWaterDiseasePig parent: MultiDiseasePig {
 		food[0].pig <- self;
 		abstracts <- [water[0], food[0]];
 	}
+	
+	/**
+	 * Util functions
+	 */
+	float get_init_weight {
+		return rnd(47.5, 52.5) with_precision 2;
+	}
+	/*****/
 }

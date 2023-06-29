@@ -60,4 +60,23 @@ experiment Normal {
         	}
         }
     }
+    
+    reflex log when: mod(cycle, 24 * 60) = 0 {
+    	ask simulations {
+    		loop pig over: Pig {
+    			save [
+    				floor(cycle / (24 * 60)),
+    				pig.id,
+    				pig.target_dfi,
+    				pig.dfi,
+    				pig.target_cfi,
+    				pig.cfi,
+    				pig.weight,
+    				pig.eat_count,
+    				pig.excrete_each_day,
+    				pig.excrete_count
+    			] to: "../includes/output/normal/" + string(pig.id) + ".csv" rewrite: false type: "csv";	
+    		}
+		}		
+    }
 }
