@@ -283,10 +283,10 @@ species Pig {
      
      float cfi {
      	if(length(cfi) = 0) {
-     		return dfi() with_precision 2;
+     		return dfi with_precision 2;
      	}
      	else {
-     		return (cfi + dfi()) with_precision 2;
+     		return (cfi + dfi) with_precision 2;
      	}
      }
      
