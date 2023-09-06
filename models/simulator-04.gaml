@@ -13,9 +13,12 @@ import './food-disease-pig.gaml'
 
 global {
 	file pigs;
+	int speed;
 	
     init {
     	pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
+    	speed <- 45;
+    	
     	create FoodDiseasePigCD from: pigs;
         create Trough number: 5;
         loop i from: 0 to: 4 {
@@ -32,8 +35,8 @@ global {
 
 experiment CD {
     output {
-        display Simulator {
-            grid Background lines: #black;
+        display Simulator autosave: mod(cycle, speed) = 0 ? "simulator-cd-" + string(cycle) : nil {
+            grid Background border: #black;
             species FoodDiseasePigCD aspect: base;
         }
         display CFI refresh: every((60 * 24)#cycles) {
@@ -43,20 +46,20 @@ experiment CD {
         		}
         	}
         }
-        display Weight refresh: every((60 * 24)#cycles) {
+        display Weight autosave: mod(cycle, 24 * 60) = 0 ? "weight-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: FoodDiseasePigCD {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 refresh: every((60 * 24)#cycles) {
+        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "cfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: FoodDiseasePigCD[0].cfi;
         		data 'Target CFI' value: FoodDiseasePigCD[0].target_cfi;
         	}
         }
-        display DFIPig0 refresh: every((60 * 24)#cycles) {
+        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "dfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: FoodDiseasePigCD[0].dfi;
         		data 'Target DFI' value: FoodDiseasePigCD[0].target_dfi;
@@ -80,7 +83,7 @@ experiment CD {
     				pig.excrete_count,
     				pig.expose_count_per_day,
     				pig.recover_count
-    			] to: "../includes/output/cd/" + string(pig.id) + ".csv" rewrite: false type: "csv";	
+    			] to: "../includes/output/cd/" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
     }

@@ -252,7 +252,7 @@ species Pig {
      		return (2 + t * 1 / ts) with_precision 2;	
      	}
      	else {
-     		return 3;
+     		return 3.0;
      	}
      }
      
@@ -275,7 +275,7 @@ species Pig {
      
      float dfi {
      	if(eat_count = 0 and cycle > 0) {
-     		return 0;
+     		return 0.0;
      	}
      	float mean <- target_dfi() * (1 - resistance() + resilience());
      	return max(0, rnd(mean - 0.5, mean + 0.5)) with_precision 2;

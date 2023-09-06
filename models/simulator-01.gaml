@@ -12,8 +12,11 @@ import './pig.gaml'
 
 
 global {
+	int speed;
+	
     init {
     	file pigs <- csv_file("../includes/input/pigs.csv", true);
+    	speed <- 45;
     	
     	create Pig from: pigs;
         create Trough number: 5;
@@ -29,8 +32,8 @@ global {
 
 experiment Normal {
     output {
-        display Simulator {
-            grid Background lines: #black;
+        display Simulator autosave: mod(cycle, speed) = 0 ? "simulator-normal-" + string(cycle) : nil {
+            grid Background border: #black;
             species Pig aspect: base;
         }
         display CFI refresh: every((60 * 24)#cycles) {
@@ -40,20 +43,20 @@ experiment Normal {
         		}
         	}
         }
-        display Weight refresh: every((60 * 24)#cycles) {
+        display Weight autosave: mod(cycle, 24 * 60) = 0 ? "weight-normal-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: Pig {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 refresh: every((60 * 24)#cycles) {
+        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "cfipig0-normal-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: Pig[0].cfi;
         		data 'Target CFI' value: Pig[0].target_cfi;
         	}
         }
-        display DFIPig0 refresh: every((60 * 24)#cycles) {
+        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "dfipig0-normal-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: Pig[0].dfi;
         		data 'Target DFI' value: Pig[0].target_dfi;
@@ -75,7 +78,7 @@ experiment Normal {
     				pig.eat_count,
     				pig.excrete_each_day,
     				pig.excrete_count
-    			] to: "../includes/output/normal/" + string(pig.id) + ".csv" rewrite: false type: "csv";	
+    			] to: "../includes/output/normal/" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
     }
