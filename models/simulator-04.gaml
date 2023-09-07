@@ -37,31 +37,31 @@ global {
 experiment CD {
 	parameter "Experiment ID" var: experiment_id <- "";
     output {
-        display Simulator autosave: mod(cycle, speed) = 0 ? experiment_id + "-simulator-cd-" + string(cycle) : nil {
+        display Simulator name: "Simulator" {
             grid Background border: #black;
             species FoodDiseasePigCD aspect: base;
         }
-        display CFI autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfi-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFI name: "CFI" refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
         		loop pig over: FoodDiseasePigCD {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
-        display Weight autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-weight-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display Weight name: "Weight" refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: FoodDiseasePigCD {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFIPig0 name: "CFIPig0" refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: FoodDiseasePigCD[0].cfi;
         		data 'Target CFI' value: FoodDiseasePigCD[0].target_cfi;
         	}
         }
-        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-dfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display DFIPig0 name: "DFIPig0" refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: FoodDiseasePigCD[0].dfi;
         		data 'Target DFI' value: FoodDiseasePigCD[0].target_dfi;
@@ -88,5 +88,15 @@ experiment CD {
     			] to: "../includes/output/cd/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
+    }
+    
+    reflex capture when: mod(cycle, speed) = 0 {
+    	ask simulations {
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-simulator-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-cfi-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-weight-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-cfipig0-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dfipig0-normal-" + string(cycle) + ".png";
+    	}
     }
 }

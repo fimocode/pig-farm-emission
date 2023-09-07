@@ -41,31 +41,31 @@ global {
 experiment Multi {
 	parameter "Experiment ID" var: experiment_id <- "";
     output {
-        display Simulator autosave: mod(cycle, speed) = 0 ? experiment_id + "-simulator-multi-" + string(cycle) : nil {
+        display Simulator name: "Simulator" {
             grid Background border: #black;
             species FoodWaterDiseasePig aspect: base;
         }
-        display CFI autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfi-multi-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFI name: "CFI" refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
         		loop pig over: FoodWaterDiseasePig {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
-        display Weight autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-weight-multi-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display Weight name: "Weight" refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: FoodWaterDiseasePig {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfipig0-multi-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFIPig0 name: "CFIPig0" refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: FoodWaterDiseasePig[0].cfi;
         		data 'Target CFI' value: FoodWaterDiseasePig[0].target_cfi;
         	}
         }
-        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-dfipig0-multi-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display DFIPig0 name: "DFIPig0" refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: FoodWaterDiseasePig[0].dfi;
         		data 'Target DFI' value: FoodWaterDiseasePig[0].target_dfi;
@@ -92,5 +92,15 @@ experiment Multi {
     			] to: "../includes/output/multi/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
+    }
+    
+    reflex capture when: mod(cycle, speed) = 0 {
+    	ask simulations {
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-simulator-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-cfi-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-weight-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-cfipig0-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dfipig0-normal-" + string(cycle) + ".png";
+    	}
     }
 }
