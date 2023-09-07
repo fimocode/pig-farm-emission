@@ -1,3 +1,4 @@
 .project
 includes/output/*
 .settings/
+models/snapshots/*

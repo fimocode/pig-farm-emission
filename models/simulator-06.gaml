@@ -14,6 +14,7 @@ import './transmit-disease-pig.gaml'
 global {
 	file pigs;
 	int speed;
+	string experiment_id;
 	
     init {
     	pigs <- csv_file("../includes/input/transmit-disease-pigs.csv", true);
@@ -34,32 +35,33 @@ global {
 }
 
 experiment Transmit {
+	parameter "Experiment ID" var: experiment_id <- "";
     output {
-        display Simulator autosave: mod(cycle, speed) = 0 ? "simulator-transmit-" + string(cycle) : nil {
+        display Simulator autosave: mod(cycle, speed) = 0 ? experiment_id + "-simulator-transmit-" + string(cycle) : nil {
             grid Background border: #black;
             species TransmitDiseasePig aspect: base;
         }
-        display CFI autosave: mod(cycle, 24 * 60) = 0 ? "cfi-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFI autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfi-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
         		loop pig over: TransmitDiseasePig {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
-        display Weight autosave: mod(cycle, 24 * 60) = 0 ? "weight-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display Weight autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-weight-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: TransmitDiseasePig {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "cfipig0-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfipig0-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: TransmitDiseasePig[0].cfi;
         		data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
         	}
         }
-        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "dfipig0-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-dfipig0-transmit-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: TransmitDiseasePig[0].dfi;
         		data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
@@ -83,7 +85,7 @@ experiment Transmit {
     				pig.excrete_count,
     				pig.expose_count_per_day,
     				pig.recover_count
-    			] to: "../includes/output/transmit/" + string(pig.id) + ".csv" rewrite: false format: "csv";	
+    			] to: "../includes/output/transmit/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
     }

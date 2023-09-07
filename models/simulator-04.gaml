@@ -14,6 +14,7 @@ import './food-disease-pig.gaml'
 global {
 	file pigs;
 	int speed;
+	string experiment_id;
 	
     init {
     	pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
@@ -34,32 +35,33 @@ global {
 }
 
 experiment CD {
+	parameter "Experiment ID" var: experiment_id <- "";
     output {
-        display Simulator autosave: mod(cycle, speed) = 0 ? "simulator-cd-" + string(cycle) : nil {
+        display Simulator autosave: mod(cycle, speed) = 0 ? experiment_id + "-simulator-cd-" + string(cycle) : nil {
             grid Background border: #black;
             species FoodDiseasePigCD aspect: base;
         }
-        display CFI refresh: every((60 * 24)#cycles) {
+        display CFI autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfi-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI" type: series {
         		loop pig over: FoodDiseasePigCD {
         			data string(pig.id) value: pig.cfi;
         		}
         	}
         }
-        display Weight autosave: mod(cycle, 24 * 60) = 0 ? "weight-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display Weight autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-weight-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "Weight" type: histogram {
         		loop pig over: FoodDiseasePigCD {
         			data string(pig.id) value: pig.weight;
         		}
         	}
         }
-        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "cfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display CFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-cfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "CFI vs Target CFI" type: series {
         		data 'CFI' value: FoodDiseasePigCD[0].cfi;
         		data 'Target CFI' value: FoodDiseasePigCD[0].target_cfi;
         	}
         }
-        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? "dfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
+        display DFIPig0 autosave: mod(cycle, 24 * 60) = 0 ? experiment_id + "-dfipig0-cd-" + string(mod(cycle, 24 * 60)) : nil refresh: every((60 * 24)#cycles) {
         	chart "DFI vs Target DFI" type: series {
         		data 'DFI' value: FoodDiseasePigCD[0].dfi;
         		data 'Target DFI' value: FoodDiseasePigCD[0].target_dfi;
@@ -83,7 +85,7 @@ experiment CD {
     				pig.excrete_count,
     				pig.expose_count_per_day,
     				pig.recover_count
-    			] to: "../includes/output/cd/" + string(pig.id) + ".csv" rewrite: false format: "csv";	
+    			] to: "../includes/output/cd/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";	
     		}
 		}		
     }
