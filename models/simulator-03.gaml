@@ -94,11 +94,11 @@ experiment DC {
     
     reflex capture when: mod(cycle, speed) = 0 {
     	ask simulations {
-    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-simulator-normal-" + string(cycle) + ".png";
-    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-cfi-normal-" + string(cycle) + ".png";
-    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-weight-normal-" + string(cycle) + ".png";
-    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-cfipig0-normal-" + string(cycle) + ".png";
-    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dfipig0-normal-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-simulator-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-cfi-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-weight-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+    		save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
     	}
     }
 }
