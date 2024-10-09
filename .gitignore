@@ -1,3 +1,4 @@
 .project
 includes/output/*
 .settings/
+.DS_Store
