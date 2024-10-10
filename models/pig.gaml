@@ -53,8 +53,8 @@ species Pig {
 	list<float> feed_resD;
 
 	// Emission attributes
-	float co2_emission; // Daily CO2 emission from respiration (kg)
-	float ch4_emission; // Daily CH4 emission from fermentation (kg)
+	float daily_co2_emission; // Daily CO2 emission from respiration (kg)
+	float daily_ch4_emission; // Daily CH4 emission from fermentation (kg)
 	float cumulative_co2_emission; // Total CO2 emission (kg)
 	float cumulative_ch4_emission; // Total CH4 mission (kg)
 	aspect base {
@@ -88,10 +88,10 @@ species Pig {
 		feed_me <- (list(feed_composition_data_file.contents) copy_between (1, 14)) collect float(each);
 		feed_ne <- (list(feed_composition_data_file.contents) copy_between (15, 28)) collect float(each);
 		feed_resD <- (list(feed_composition_data_file.contents) copy_between (29, 42)) collect float(each);
-		co2_emission <- co2_emission();
-		ch4_emission <- ch4_emission();
-		cumulative_co2_emission <- 0.0;
-		cumulative_ch4_emission <- 0.0;
+		daily_co2_emission <- daily_co2_emission();
+		daily_ch4_emission <- daily_ch4_emission();
+		cumulative_co2_emission <- cumulative_co2_emission();
+		cumulative_ch4_emission <- cumulative_ch4_emission();
 	}
 
 	/**
@@ -298,10 +298,9 @@ species Pig {
 	float cfi {
 		if (length(cfi) = 0) {
 			return dfi with_precision 2;
-		} else {
-			return (cfi + dfi) with_precision 2;
 		}
 
+		return (cfi + dfi) with_precision 2;
 	}
 
 	float weight {
@@ -405,9 +404,9 @@ species Pig {
      * CO2 and CH4 calculators
      * *******************************
      */
-	float co2_emission {
+	float daily_co2_emission {
 		if dfi = 0.0 {
-			return 0.0;
+			return 750 * weight ^ 0.6;
 		}
 
 		float me <- 0.0;
@@ -424,12 +423,10 @@ species Pig {
 		}
 
 		float heat_prod <- 750 * weight ^ 0.6 + (1 - ne / me) * me * dfi;
-		float result <- 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
-		//		write "co2: " + result;
 		return 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
 	}
 
-	float ch4_emission {
+	float daily_ch4_emission {
 		if dfi = 0.0 {
 			return 0.0;
 		}
@@ -444,6 +441,22 @@ species Pig {
 		}
 
 		return resD * dfi * 670 / 1000 / 56.65 with_precision 4;
+	}
+
+	float cumulative_co2_emission {
+		if (cumulative_co2_emission = 0.0) {
+			return daily_co2_emission with_precision 4;
+		}
+
+		return (cumulative_co2_emission + daily_co2_emission) with_precision 4;
+	}
+
+	float cumulative_ch4_emission {
+		if (cumulative_ch4_emission = 0.0) {
+			return daily_ch4_emission with_precision 4;
+		}
+
+		return (cumulative_ch4_emission + daily_ch4_emission) with_precision 4;
 	}
 
 	/*****/
@@ -485,8 +498,10 @@ species Pig {
 			eat_count <- 0;
 			excrete_count <- 0;
 			excrete_each_day <- get_excrete_per_day();
-			co2_emission <- co2_emission();
-			ch4_emission <- ch4_emission();
+			daily_co2_emission <- daily_co2_emission();
+			daily_ch4_emission <- daily_ch4_emission();
+			cumulative_co2_emission <- cumulative_co2_emission();
+			cumulative_ch4_emission <- cumulative_ch4_emission();
 		}
 
 	}
