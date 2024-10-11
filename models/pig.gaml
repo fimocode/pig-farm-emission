@@ -406,7 +406,7 @@ species Pig {
      */
 	float daily_co2_emission {
 		if dfi = 0.0 {
-			return 750 * weight ^ 0.6;
+			return 750 * weight ^ 0.6 / 1000;
 		}
 
 		float me <- 0.0;

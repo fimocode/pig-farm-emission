@@ -7,6 +7,16 @@ global {
 	int speed;
 	string experiment_id;
 
+	action calculate_total_emissions {
+		float total_CO2 <- 0.0;
+		float total_CH4 <- 0.0;
+		loop pig over: Pig {
+			total_CO2 <- total_CO2 + pig.daily_co2_emission;
+			total_CH4 <- total_CH4 + pig.daily_ch4_emission;
+		}
+
+	}
+
 	init {
 		file pigs <- csv_file("../includes/input/pigs.csv", true);
 		speed <- 45;
@@ -28,7 +38,7 @@ experiment Normal {
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
 		display Simulator name: "Simulator" {
-			grid Background border: #black;
+			grid Background;
 			species Pig aspect: base;
 		}
 
@@ -36,6 +46,7 @@ experiment Normal {
 			chart "CFI" type: series {
 				loop pig over: Pig {
 					data string(pig.id) value: pig.cfi;
+					write "id: " + pig.cfi;
 				}
 
 			}
@@ -88,16 +99,27 @@ experiment Normal {
 
 		}
 
+		display TotalEmission name: "TotalEmission" refresh: every((60 * 24) #cycles) {
+			chart "Total cumulative emission (kg)" type: series {
+				data "CO2" value: Pig sum_of (each.cumulative_co2_emission) color: #blue;
+				data "CH4" value: Pig sum_of (each.cumulative_ch4_emission) color: #red;
+			}
+
+		}
+
 	}
 
 	reflex log when: mod(cycle, 24 * 60) = 0 {
 		ask simulations {
+			float total_CO2_emission <- Pig sum_of (each.cumulative_co2_emission);
+			float total_CH4_emission <- Pig sum_of (each.cumulative_ch4_emission);
 			loop pig over: Pig {
 				save
-				[floor(cycle / (24 * 60)), pig.id, pig.target_dfi, pig.dfi, pig.target_cfi, pig.cfi, pig.weight, pig.eat_count, pig.excrete_each_day, pig.excrete_count, pig.daily_co2_emission, pig.daily_ch4_emission]
+				[floor(cycle / (24 * 60)), pig.id, pig.target_dfi, pig.dfi, pig.target_cfi, pig.cfi, pig.weight, pig.eat_count, pig.excrete_each_day, pig.excrete_count, pig.daily_co2_emission, pig.daily_ch4_emission, pig.cumulative_co2_emission, pig.cumulative_ch4_emission]
 				to: "../includes/output/normal/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
 		}
 
 	}
@@ -111,6 +133,7 @@ experiment Normal {
 			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+			save (snapshot(self, "TotalEmission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalemission-" + string(cycle) + ".png";
 		}
 
 	}
