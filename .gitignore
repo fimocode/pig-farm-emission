@@ -2,3 +2,4 @@
 includes/output/*
 .settings/
 .DS_Store
+.vscode
