@@ -124,6 +124,9 @@ experiment CC {
 			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-weight-" + string(cycle) + ".png";
 			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
 			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
+			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+			save (snapshot(self, "TotalEmission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalemission-" + string(cycle) + ".png";
 		}
 
 	}
