@@ -46,7 +46,6 @@ experiment Normal {
 			chart "CFI" type: series {
 				loop pig over: Pig {
 					data string(pig.id) value: pig.cfi;
-					write "id: " + pig.cfi;
 				}
 
 			}
