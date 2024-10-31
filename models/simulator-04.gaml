@@ -1,7 +1,3 @@
-/**
-* Name: Simulator
-* Author: Lê Đức Toàn
-*/
 model Simulator
 
 import './food-disease-config.gaml'
