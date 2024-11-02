@@ -7,16 +7,6 @@ global {
 	int speed;
 	string experiment_id;
 
-	action calculate_total_emissions {
-		float total_CO2 <- 0.0;
-		float total_CH4 <- 0.0;
-		loop pig over: Pig {
-			total_CO2 <- total_CO2 + pig.daily_co2_emission;
-			total_CH4 <- total_CH4 + pig.daily_ch4_emission;
-		}
-
-	}
-
 	init {
 		file pigs <- csv_file("../includes/input/pigs.csv", true);
 		speed <- 45;
@@ -37,9 +27,17 @@ global {
 experiment Normal {
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
-		display Simulator name: "Simulator" {
+		display Simulator name: "Simulator" refresh: every((60 * 24) #cycles) {
 			grid Background;
 			species Pig aspect: base;
+			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
+				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {4, 15} font: font("Arial", 22, #plain);
+				draw rectangle(30, 30) at: {4, 45} color: #blue;
+				draw "CO2: " + (Pig sum_of (each.daily_co2_emission) with_precision 2) + " kg" at: {25, 58} color: #black font: font("Arial", 18, #plain);
+				draw rectangle(30, 30) at: {4, 80} color: #red;
+				draw "CH4: " + (Pig sum_of (each.daily_ch4_emission) with_precision 2) + " kg" at: {25, 88} color: #black font: font("Arial", 18, #plain);
+			}
+
 		}
 
 		display CFI name: "CFI" refresh: every((60 * 24) #cycles) {

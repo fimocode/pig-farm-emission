@@ -58,7 +58,7 @@ species Pig {
 	float cumulative_co2_emission; // Total CO2 emission (kg)
 	float cumulative_ch4_emission; // Total CH4 mission (kg)
 	aspect base {
-		draw image("../includes/images/pig.png") size: 5.0;
+		draw image("../includes/images/pig.png") size: 6.0;
 		draw string(id) color: #black size: 6;
 	}
 
