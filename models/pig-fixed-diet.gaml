@@ -28,7 +28,7 @@ import './farm.gaml'
  * 8  | excrete | excrete_time | relax_after_excrete: [0]
  * 9  | die     |
 */
-species Pig {
+species PigFixedDiet {
 	int id;
 	float a; // params to calculate weight
 	float b; // params to calculate weight
