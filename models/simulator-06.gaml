@@ -34,15 +34,13 @@ experiment Transmit {
 			grid Background;
 			species TransmitDiseasePig aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
-				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 0} font: font("Arial", 18, #plain);
+				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 2} font: font("Arial", 18, #plain);
 				float average_co2_hour <- (TransmitDiseasePig sum_of (each.daily_co2_emission)) / 24;
-				rgb co2_color <- (average_co2_hour > 1) ? #red : #green;
-				draw rectangle(10, 10) at: {1, 20} color: co2_color;
-				draw "Avg CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {15, 25} color: #black font: font("Arial", 16, #plain);
+				rgb co2_color <- (average_co2_hour > 0.5) ? #red : #green;
+				draw "Avg CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
 				float average_ch4_hour <- (TransmitDiseasePig sum_of (each.daily_ch4_emission)) / 24;
 				rgb ch4_color <- (average_ch4_hour > 0.036) ? #red : #green;
-				draw rectangle(10, 10) at: {1, 35} color: ch4_color;
-				draw "Avg CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {15, 40} color: #black font: font("Arial", 16, #plain);
+				draw "Avg CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
 			}
 
 		}
@@ -67,22 +65,21 @@ experiment Transmit {
 
 		}
 
-//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
-//			chart "CFI vs Target CFI" type: series {
-//				data 'CFI' value: TransmitDiseasePig[0].cfi;
-//				data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
-//			}
-//
-//		}
-//
-//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
-//			chart "DFI vs Target DFI" type: series {
-//				data 'DFI' value: TransmitDiseasePig[0].dfi;
-//				data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
-//			}
-//
-//		}
-
+		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
+		//			chart "CFI vs Target CFI" type: series {
+		//				data 'CFI' value: TransmitDiseasePig[0].cfi;
+		//				data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
+		//			}
+		//
+		//		}
+		//
+		//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
+		//			chart "DFI vs Target DFI" type: series {
+		//				data 'DFI' value: TransmitDiseasePig[0].dfi;
+		//				data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
+		//			}
+		//
+		//		}
 		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CO2 emission (kg)" type: series {
 				loop pig over: TransmitDiseasePig {
