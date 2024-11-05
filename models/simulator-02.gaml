@@ -30,12 +30,24 @@ experiment CC {
 		display Simulator name: "Simulator" {
 			grid Background;
 			species FoodDiseasePigCC aspect: base;
+			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
+				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {4, 15} font: font("Arial", 22, #plain);
+				float average_co2_hour <- (FoodDiseasePigCC sum_of (each.daily_co2_emission)) / 24;
+				rgb co2_color <- (average_co2_hour > 1) ? #red : #green;
+				draw rectangle(30, 30) at: {4, 45} color: co2_color;
+				draw "Average CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {25, 58} color: #black font: font("Arial", 18, #plain);
+				float average_ch4_hour <- (FoodDiseasePigCC sum_of (each.daily_ch4_emission)) / 24;
+				rgb ch4_color <- (average_ch4_hour > 0.036) ? #red : #green;
+				draw rectangle(30, 30) at: {4, 80} color: ch4_color;
+				draw "Average CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {25, 88} color: #black font: font("Arial", 18, #plain);
+			}
+
 		}
 
-		display CFI name: "CFI" refresh: every((60 * 24) #cycles) {
+		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
 			chart "CFI" type: series {
 				loop pig over: FoodDiseasePigCC {
-					data string(pig.id) value: pig.cfi;
+					data string(pig.id) value: pig.dfi;
 				}
 
 			}
@@ -52,22 +64,21 @@ experiment CC {
 
 		}
 
-		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
-			chart "CFI vs Target CFI" type: series {
-				data 'CFI' value: FoodDiseasePigCC[0].cfi;
-				data 'Target CFI' value: FoodDiseasePigCC[0].target_cfi;
-			}
-
-		}
-
-		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
-			chart "DFI vs Target DFI" type: series {
-				data 'DFI' value: FoodDiseasePigCC[0].dfi;
-				data 'Target DFI' value: FoodDiseasePigCC[0].target_dfi;
-			}
-
-		}
-
+		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
+		//			chart "CFI vs Target CFI" type: series {
+		//				data 'CFI' value: FoodDiseasePigCC[0].cfi;
+		//				data 'Target CFI' value: FoodDiseasePigCC[0].target_cfi;
+		//			}
+		//
+		//		}
+		//
+		//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
+		//			chart "DFI vs Target DFI" type: series {
+		//				data 'DFI' value: FoodDiseasePigCC[0].dfi;
+		//				data 'Target DFI' value: FoodDiseasePigCC[0].target_dfi;
+		//			}
+		//
+		//		}
 		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CO2 emission (kg)" type: series {
 				loop pig over: FoodDiseasePigCC {
@@ -96,6 +107,20 @@ experiment CC {
 
 		}
 
+		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
+			chart "Total cumulative CO2 emission (kg)" type: series {
+				data "CO2" value: FoodDiseasePigCC sum_of (each.cumulative_co2_emission) color: #blue;
+			}
+
+		}
+
+		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
+			chart "Total cumulative CH4 emission (kg)" type: series {
+				data "CH4" value: FoodDiseasePigCC sum_of (each.cumulative_ch4_emission) color: #red;
+			}
+
+		}
+
 	}
 
 	reflex log when: mod(cycle, 24 * 60) = 0 {
@@ -108,7 +133,7 @@ experiment CC {
 				to: "../includes/output/cc/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
-			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/cc/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
 		}
 
 	}
@@ -116,13 +141,14 @@ experiment CC {
 	reflex capture when: mod(cycle, speed) = 0 {
 		ask simulations {
 			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-simulator-" + string(cycle) + ".png";
-			save (snapshot(self, "CFI", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-cfi-" + string(cycle) + ".png";
+			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dfi-" + string(cycle) + ".png";
 			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-weight-" + string(cycle) + ".png";
-			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
-			save (snapshot(self, "TotalEmission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalemission-" + string(cycle) + ".png";
+			//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+			//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
+			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
+			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/cc/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
 		}
 
 	}
