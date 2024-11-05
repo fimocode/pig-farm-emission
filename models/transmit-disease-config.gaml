@@ -1,11 +1,4 @@
-/**
-* Name: TransmitDiseaseConfig
-* Author: Lê Đức Toàn
-*/
-
-
 model TransmitDiseaseConfig
-
 
 import './transmit-disease-factor.gaml'
 
