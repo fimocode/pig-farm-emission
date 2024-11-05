@@ -1,5 +1,6 @@
-model Pig
+model PigFixedDiet
 
+/* Insert your model definition here */
 import './config.gaml'
 import './trough.gaml'
 import './farm.gaml'
@@ -46,9 +47,7 @@ species Pig {
 	bool is_dead;
 
 	// Feed details
-	list<float> feed_starter_composition;
-	list<float> feed_grower_composition;
-	list<float> feed_finisher_composition;
+	list<float> feed_composition;
 	list<float> feed_cp;
 	list<float> feed_me;
 	list<float> feed_ne;
@@ -85,9 +84,7 @@ species Pig {
 		// feed composition calculator
 		file feed_composition_file <- csv_file("../includes/input/feed-composition.csv", true);
 		file feed_composition_data_file <- csv_file("../includes/input/feed-composition-data.csv", true);
-		feed_starter_composition <- (list(feed_composition_file.contents) copy_between (0, 13)) collect float(each);
-		feed_grower_composition <- (list(feed_composition_file.contents) copy_between (13, 26)) collect float(each);
-		feed_finisher_composition <- (list(feed_composition_file.contents) copy_between (26, 39)) collect float(each);
+		feed_composition <- (list(feed_composition_file.contents) copy_between (13, 26)) collect float(each);
 		feed_me <- (list(feed_composition_data_file.contents) copy_between (1, 14)) collect float(each);
 		feed_ne <- (list(feed_composition_data_file.contents) copy_between (15, 28)) collect float(each);
 		feed_resD <- (list(feed_composition_data_file.contents) copy_between (29, 42)) collect float(each);
@@ -311,6 +308,7 @@ species Pig {
 		if (is_dead = true) {
 			return weight;
 		}
+
 		float Z <- 0.295 + 0.28 * #e ^ (-0.0402 * weight);
 		float D <- 0.11;
 		float P <- 0.0;
@@ -318,17 +316,8 @@ species Pig {
 		float Rp <- 0.0;
 		float Rl <- 0.0;
 		if (dfi != 0.0) {
-			if (weight <= 35) {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_starter_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_starter_composition[each] / 100 * feed_me[each]));
-			} else if (weight > 35 and weight <= 55) {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_grower_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_grower_composition[each] / 100 * feed_me[each]));
-			} else {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_finisher_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_finisher_composition[each] / 100 * feed_me[each]));
-			}
-
+			P <- sum(range(0, length(feed_cp) - 1) collect (feed_composition[each] / 100 * feed_cp[each] / 100));
+			Q <- sum(range(0, length(feed_me) - 1) collect (feed_composition[each] / 100 * feed_me[each]));
 			if (weight <= 100 and P > 0.11) {
 				Rp <- 0.11;
 				Rl <- (Q * dfi - (6.8 * (dfi * P - D / Z) + 0.475 * weight ^ 0.75 + 60 * D)) / 53.5;
@@ -336,57 +325,14 @@ species Pig {
 				Rp <- dfi * P * Z;
 				Rl <- (Q * dfi - (60 * dfi * P * Z + 0.475 * weight ^ 0.75)) / 53.5;
 			}
+
 		} else {
-			Rl <- (0 - 0.475 * weight^0.75) / 53.5;
+			Rl <- (0 - 0.475 * weight ^ 0.75) / 53.5;
 		}
+
 		float deltaWeight <- 1.082 * (4.4 * Rp + 1.1 * Rl);
 		return weight + deltaWeight with_precision 2;
 		//		return (init_weight + (a * (1 - e ^ (-b * (cfi + fi))))) with_precision 2;
-	}
-
-	/*****/
-	/**
-     * Feed composition during phases calculators
-     * *******************************
-     */
-
-// Starter phase
-	float me_starter_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_starter_composition[each] * dfi / 100));
-	}
-
-	float ne_starter_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_starter_composition[each] * dfi / 100));
-	}
-
-	float resD_starter_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_starter_composition[each] * dfi / 100));
-	}
-
-	// Grower phase
-	float me_grower_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_grower_composition[each] * dfi / 100));
-	}
-
-	float ne_grower_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_grower_composition[each] * dfi / 100));
-	}
-
-	float resD_grower_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_grower_composition[each] * dfi / 100));
-	}
-
-	// Finisher phase
-	float me_finisher_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_finisher_composition[each] * dfi / 100));
-	}
-
-	float ne_finisher_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_finisher_composition[each] * dfi / 100));
-	}
-
-	float resD_finisher_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_finisher_composition[each] * dfi / 100));
 	}
 
 	/*****/
@@ -397,27 +343,17 @@ species Pig {
      * *******************************
      */
 	float daily_co2_emission {
-		if (is_dead = true) { 
+		if (is_dead = true) {
 			return 0.0;
 		}
+
 		if dfi = 0.0 {
 			float heat_prod <- 750 * weight ^ 0.6;
 			return 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
 		}
 
-		float me <- 0.0;
-		float ne <- 0.0;
-		if (weight <= 35) {
-			me <- me_starter_phase();
-			ne <- ne_starter_phase();
-		} else if (weight > 35 and weight <= 55) {
-			me <- me_grower_phase();
-			ne <- ne_grower_phase();
-		} else {
-			me <- me_finisher_phase();
-			ne <- ne_finisher_phase();
-		}
-
+		float me <- sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_composition[each] * dfi / 100));
+		float ne <- sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_composition[each] * dfi / 100));
 		float heat_prod <- 750 * weight ^ 0.6 + (1 - ne / me) * me * dfi;
 		return 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
 	}
@@ -427,15 +363,7 @@ species Pig {
 			return 0.0;
 		}
 
-		float resD <- 0.0;
-		if (weight <= 35.0) {
-			resD <- resD_starter_phase();
-		} else if (weight > 35.0 and weight <= 55.0) {
-			resD <- resD_grower_phase();
-		} else {
-			resD <- resD_finisher_phase();
-		}
-
+		float resD <- sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_composition[each] * dfi / 100));
 		return resD * dfi * 670 / 1000 / 56.65 with_precision 4;
 	}
 

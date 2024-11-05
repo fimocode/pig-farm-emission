@@ -53,7 +53,7 @@ species TransmitDiseasePig parent: DiseasePig {
 		if(seir = 2) {
 			ask TransmitDiseaseConfig {
 				myself.factor <- create_factor_and_attach_to(myself);
-			}	
+			}
 		}
 	}
 	
@@ -70,6 +70,9 @@ species TransmitDiseasePig parent: DiseasePig {
 	}
 	
 	reflex remove when: seir = 3 or seir = 4 {
+		if (seir = 4) {
+			is_dead <- true;
+		}
 		ask factor as TransmitDiseaseFactor {
 			do remove();
 		}
