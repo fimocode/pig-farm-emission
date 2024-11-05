@@ -31,15 +31,15 @@ experiment Normal {
 			grid Background;
 			species Pig aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
-				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {4, 15} font: font("Arial", 22, #plain);
+				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 0} font: font("Arial", 18, #plain);
 				float average_co2_hour <- (Pig sum_of (each.daily_co2_emission)) / 24;
 				rgb co2_color <- (average_co2_hour > 1) ? #red : #green;
-				draw rectangle(30, 30) at: {4, 45} color: co2_color;
-				draw "Average CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {25, 58} color: #black font: font("Arial", 18, #plain);
+				draw rectangle(10, 10)	 at: {1, 20} color: co2_color;
+				draw "Avg CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {15, 25} color: #black font: font("Arial", 16, #plain);
 				float average_ch4_hour <- (Pig sum_of (each.daily_ch4_emission)) / 24;
 				rgb ch4_color <- (average_ch4_hour > 0.036) ? #red : #green;
-				draw rectangle(30, 30) at: {4, 80} color: ch4_color;
-				draw "Average CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {25, 88} color: #black font: font("Arial", 18, #plain);
+				draw rectangle(10, 10) at: {1, 35} color: ch4_color;
+				draw "Avg CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {15, 40} color: #black font: font("Arial", 16, #plain);
 			}
 
 		}
@@ -133,10 +133,10 @@ experiment Normal {
 		reflex capture when: mod(cycle, speed) = 0 {
 			ask simulations {
 				save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-simulator-" + string(cycle) + ".png";
-				save (snapshot(self, "CFI", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfi-" + string(cycle) + ".png";
+				save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfi-" + string(cycle) + ".png";
 				save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-weight-" + string(cycle) + ".png";
-				save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-				save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+//				save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+//				save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
 				save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
 				save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
 				save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
