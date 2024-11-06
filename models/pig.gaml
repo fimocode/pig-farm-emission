@@ -454,6 +454,13 @@ species Pig {
 
 		return (cumulative_ch4_emission + daily_ch4_emission) with_precision 4;
 	}
+	
+	action get_daily_emission_for_barn {
+		return [
+			'daily_co2_emission'::daily_co2_emission,
+			'daily_ch4_emission'::daily_ch4_emission
+		];
+	} 
 
 	/*****/
 
