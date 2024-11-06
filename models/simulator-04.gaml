@@ -41,19 +41,29 @@ global {
 }
 
 experiment CD {
+	float co2_concentration <- 0.0;
+	float ch4_concentration <- 0.0;
+	rgb co2_color <- #green;
+	rgb ch4_color <- #green;
+	int current_day <- -1;
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
 		display Simulator name: "Simulator" {
 			grid Background;
 			species FoodDiseasePigCD aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
-				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				float co2_concentration <- Barn(0).co2_concentration();
-				float ch4_concentration <- Barn(0).ch4_concentration();
-				rgb co2_color <- (co2_concentration > 1500) ? #red : #green;
+				int new_day <- floor(cycle / (24 * 60));
+				if (new_day != current_day) {
+					co2_concentration <- Barn(0).co2_concentration();
+					ch4_concentration <- Barn(0).ch4_concentration();
+					co2_color <- (co2_concentration > 1500) ? #red : #green;
+					ch4_color <- (ch4_concentration > 500) ? #red : #green;
+					current_day <- new_day;
+				}
+
+				draw "Day " + current_day color: #black at: {0, 2} font: font("Arial", 18, #plain);
 				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				rgb ch4_color <- (ch4_concentration > 500) ? #red : #green;
-				draw "CH4 lvel: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
 			}
 
 		}
