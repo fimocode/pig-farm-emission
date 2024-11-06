@@ -3,6 +3,7 @@ model Simulator
 import './food-disease-config.gaml'
 import './water-disease-config.gaml'
 import './food-water-disease-pig.gaml'
+import './gas-concentration.gaml'
 
 global {
 	file pigs;
@@ -15,14 +16,26 @@ global {
 		create FoodWaterDiseasePig from: pigs;
 		FoodWaterDiseasePig[0].id <- 0;
 		create Trough number: 5;
+		create Barn number: 1;
 		loop i from: 0 to: 4 {
 			Trough[i].location <- trough_locs[i];
+		}
+
+		ask Barn {
+			do update_emissions(list(FoodWaterDiseasePig));
 		}
 
 		create FoodDiseaseConfig number: 1;
 		create WaterDiseaseConfig number: 1;
 		FoodDiseaseConfig[0].day <- 10;
 		WaterDiseaseConfig[0].day <- 11;
+	}
+
+	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
+		ask Barn {
+			do update_emissions(list(FoodWaterDiseasePig));
+		}
+
 	}
 
 	reflex stop when: cycle = 60 * 24 * 55 {
@@ -32,19 +45,29 @@ global {
 }
 
 experiment Multi {
+	float co2_concentration <- 0.0;
+	float ch4_concentration <- 0.0;
+	rgb co2_color <- #green;
+	rgb ch4_color <- #green;
+	int current_day <- -1;
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
 		display Simulator name: "Simulator" {
 			grid Background;
 			species FoodWaterDiseasePig aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
-				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				float average_co2_hour <- (FoodWaterDiseasePig sum_of (each.daily_co2_emission)) / 24;
-				rgb co2_color <- (average_co2_hour > 0.5) ? #red : #green;
-				draw "Avg CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				float average_ch4_hour <- (FoodWaterDiseasePig sum_of (each.daily_ch4_emission)) / 24;
-				rgb ch4_color <- (average_ch4_hour > 0.036) ? #red : #green;
-				draw "Avg CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				int new_day <- floor(cycle / (24 * 60));
+				if (new_day != current_day) {
+					co2_concentration <- Barn(0).co2_concentration();
+					ch4_concentration <- Barn(0).ch4_concentration();
+					co2_color <- (co2_concentration > 1500) ? #red : #green;
+					ch4_color <- (ch4_concentration > 500) ? #red : #green;
+					current_day <- new_day;
+				}
+
+				draw "Day " + current_day color: #black at: {0, 2} font: font("Arial", 18, #plain);
+				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
+				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
 			}
 
 		}
@@ -140,8 +163,8 @@ experiment Multi {
 			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-simulator-" + string(cycle) + ".png";
 			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dfi-" + string(cycle) + ".png";
 			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-weight-" + string(cycle) + ".png";
-			//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-			//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
 			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/multi/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
