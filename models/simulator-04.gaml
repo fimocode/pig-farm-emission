@@ -2,6 +2,7 @@ model Simulator
 
 import './food-disease-config.gaml'
 import './food-disease-pig.gaml'
+import './gas-concentration.gaml'
 
 global {
 	file pigs;
@@ -13,12 +14,24 @@ global {
 		speed <- 45;
 		create FoodDiseasePigCD from: pigs;
 		create Trough number: 5;
+		create Barn number: 1;
 		loop i from: 0 to: 4 {
 			Trough[i].location <- trough_locs[i];
 		}
 
+		ask Barn {
+			do update_emissions(list(FoodDiseasePigCD));
+		}
+
 		create FoodDiseaseConfig number: 1;
 		FoodDiseaseConfig[0].day <- 35;
+	}
+
+	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
+		ask Barn {
+			do update_emissions(list(FoodDiseasePigCD));
+		}
+
 	}
 
 	reflex stop when: cycle = 60 * 24 * 55 {
@@ -35,12 +48,12 @@ experiment CD {
 			species FoodDiseasePigCD aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
 				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				float average_co2_hour <- (FoodDiseasePigCD sum_of (each.daily_co2_emission)) / 24;
-				rgb co2_color <- (average_co2_hour > 0.5) ? #red : #green;
-				draw "Avg CO2/hour: " + (average_co2_hour with_precision 3) + " kg" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				float average_ch4_hour <- (FoodDiseasePigCD sum_of (each.daily_ch4_emission)) / 24;
-				rgb ch4_color <- (average_ch4_hour > 0.036) ? #red : #green;
-				draw "Avg CH4/hour: " + average_ch4_hour with_precision 3 + " kg" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				float co2_concentration <- Barn(0).co2_concentration();
+				float ch4_concentration <- Barn(0).ch4_concentration();
+				rgb co2_color <- (co2_concentration > 1500) ? #red : #green;
+				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
+				rgb ch4_color <- (ch4_concentration > 500) ? #red : #green;
+				draw "CH4 lvel: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
 			}
 
 		}
