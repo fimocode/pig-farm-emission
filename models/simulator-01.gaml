@@ -38,19 +38,29 @@ global {
 }
 
 experiment Normal {
+	float co2_concentration <- 0.0;
+	float ch4_concentration <- 0.0;
+	rgb co2_color <- #green;
+	rgb ch4_color <- #green;
+	int current_day <- -1;
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
-		display Simulator name: "Simulator" refresh: every((60 * 24) #cycles) {
+		display Simulator name: "Simulator" {
 			grid Background;
 			species Pig aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
-				draw "Day " + floor(cycle / (24 * 60)) color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				float co2_concentration <- Barn(0).co2_concentration();
-				float ch4_concentration <- Barn(0).ch4_concentration();
-				rgb co2_color <- (co2_concentration > 1500) ? #red : #green;
+				int new_day <- floor(cycle / (24 * 60));
+				if (new_day != current_day) {
+					co2_concentration <- Barn(0).co2_concentration();
+					ch4_concentration <- Barn(0).ch4_concentration();
+					co2_color <- (co2_concentration > 1500) ? #red : #green;
+					ch4_color <- (ch4_concentration > 500) ? #red : #green;
+					current_day <- new_day;
+				}
+
+				draw "Day " + current_day color: #black at: {0, 2} font: font("Arial", 18, #plain);
 				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				rgb ch4_color <- (ch4_concentration > 500) ? #red : #green;
-				draw "CH4 lvel: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
 			}
 
 		}
@@ -146,8 +156,8 @@ experiment Normal {
 			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-simulator-" + string(cycle) + ".png";
 			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfi-" + string(cycle) + ".png";
 			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-weight-" + string(cycle) + ".png";
-//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+			//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+			//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
 			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
 			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
