@@ -154,19 +154,19 @@ experiment CD {
 
 	}
 
-	reflex capture when: mod(cycle, speed) = 0 {
-		ask simulations {
-			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-simulator-" + string(cycle) + ".png";
-			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dfi-" + string(cycle) + ".png";
-			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-weight-" + string(cycle) + ".png";
-			//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-			//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
-			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
-			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
-		}
-
-	}
+//	reflex capture when: mod(cycle, speed) = 0 {
+//		ask simulations {
+//			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-simulator-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dfi-" + string(cycle) + ".png";
+//			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-weight-" + string(cycle) + ".png";
+//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/cd/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
+//		}
+//
+//	}
 
 }
