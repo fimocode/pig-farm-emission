@@ -12,7 +12,7 @@ global {
 	init {
 		pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
 		speed <- 45;
-		create FoodDiseasePigCD from: pigs;
+		create FoodDiseasePigCD from: pigs with: [feeding_regime::2];
 		create Trough number: 5;
 		create Barn number: 1;
 		loop i from: 0 to: 4 {
@@ -40,7 +40,7 @@ global {
 
 }
 
-experiment CD {
+experiment CDFixedDiet {
 	float co2_concentration <- 0.0;
 	float ch4_concentration <- 0.0;
 	rgb co2_color <- #green;

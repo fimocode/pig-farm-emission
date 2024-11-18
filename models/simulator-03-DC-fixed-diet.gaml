@@ -12,25 +12,24 @@ global {
 	init {
 		pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
 		speed <- 45;
-		create FoodDiseasePigDD from: pigs;
-		create Barn number: 1;
+		create FoodDiseasePigDC from: pigs with: [feeding_regime::2];
 		create Trough number: 5;
+		create Barn number: 1;
 		loop i from: 0 to: 4 {
 			Trough[i].location <- trough_locs[i];
 		}
 
 		ask Barn {
-			do update_emissions(list(FoodDiseasePigDD));
+			do update_emissions(list(FoodDiseasePigDC));
 		}
 
-		create FoodDiseaseConfig number: 2;
+		create FoodDiseaseConfig number: 1;
 		FoodDiseaseConfig[0].day <- 14;
-		FoodDiseaseConfig[1].day <- 35;
 	}
 
 	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
 		ask Barn {
-			do update_emissions(list(FoodDiseasePigDD));
+			do update_emissions(list(FoodDiseasePigDC));
 		}
 
 	}
@@ -41,7 +40,7 @@ global {
 
 }
 
-experiment DD {
+experiment DCFixedDiet {
 	float co2_concentration <- 0.0;
 	float ch4_concentration <- 0.0;
 	rgb co2_color <- #green;
@@ -51,7 +50,7 @@ experiment DD {
 	output {
 		display Simulator name: "Simulator" {
 			grid Background;
-			species FoodDiseasePigDD aspect: base;
+			species FoodDiseasePigDC aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
 				int new_day <- floor(cycle / (24 * 60));
 				if (new_day != current_day) {
@@ -71,7 +70,7 @@ experiment DD {
 
 		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
 			chart "DFI" type: series {
-				loop pig over: FoodDiseasePigDD {
+				loop pig over: FoodDiseasePigDC {
 					data string(pig.id) value: pig.dfi;
 				}
 
@@ -81,7 +80,7 @@ experiment DD {
 
 		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
 			chart "Weight" type: histogram {
-				loop pig over: FoodDiseasePigDD {
+				loop pig over: FoodDiseasePigDC {
 					data string(pig.id) value: pig.weight;
 				}
 
@@ -91,22 +90,22 @@ experiment DD {
 
 		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
 		//			chart "CFI vs Target CFI" type: series {
-		//				data 'CFI' value: FoodDiseasePigDD[0].cfi;
-		//				data 'Target CFI' value: FoodDiseasePigDD[0].target_cfi;
+		//				data 'CFI' value: FoodDiseasePigDC[0].cfi;
+		//				data 'Target CFI' value: FoodDiseasePigDC[0].target_cfi;
 		//			}
 		//
 		//		}
 		//
 		//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
 		//			chart "DFI vs Target DFI" type: series {
-		//				data 'DFI' value: FoodDiseasePigDD[0].dfi;
-		//				data 'Target DFI' value: FoodDiseasePigDD[0].target_dfi;
+		//				data 'DFI' value: FoodDiseasePigDC[0].dfi;
+		//				data 'Target DFI' value: FoodDiseasePigDC[0].target_dfi;
 		//			}
 		//
 		//		}
 		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CO2 emission (kg)" type: series {
-				loop pig over: FoodDiseasePigDD {
+				loop pig over: FoodDiseasePigDC {
 					data string(pig.id) value: pig.daily_co2_emission;
 				}
 
@@ -116,7 +115,7 @@ experiment DD {
 
 		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CH4 emission (kg)" type: series {
-				loop pig over: FoodDiseasePigDD {
+				loop pig over: FoodDiseasePigDC {
 					data string(pig.id) value: pig.daily_ch4_emission;
 				}
 
@@ -126,14 +125,14 @@ experiment DD {
 
 		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Total cumulative CO2 emission (kg)" type: series {
-				data "CO2" value: FoodDiseasePigDD sum_of (each.cumulative_co2_emission) color: #blue;
+				data "CO2" value: FoodDiseasePigDC sum_of (each.cumulative_co2_emission) color: #blue;
 			}
 
 		}
 
 		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
 			chart "Total cumulative CH4 emission (kg)" type: series {
-				data "CH4" value: FoodDiseasePigDD sum_of (each.cumulative_ch4_emission) color: #red;
+				data "CH4" value: FoodDiseasePigDC sum_of (each.cumulative_ch4_emission) color: #red;
 			}
 
 		}
@@ -142,30 +141,30 @@ experiment DD {
 
 	reflex log when: mod(cycle, 24 * 60) = 0 {
 		ask simulations {
-			float total_CO2_emission <- FoodDiseasePigDD sum_of (each.cumulative_co2_emission);
-			float total_CH4_emission <- FoodDiseasePigDD sum_of (each.cumulative_ch4_emission);
-			loop pig over: FoodDiseasePigDD {
+			float total_CO2_emission <- FoodDiseasePigDC sum_of (each.cumulative_co2_emission);
+			float total_CH4_emission <- FoodDiseasePigDC sum_of (each.cumulative_ch4_emission);
+			loop pig over: FoodDiseasePigDC {
 				save
 				[floor(cycle / (24 * 60)), pig.id, pig.target_dfi, pig.dfi, pig.target_cfi, pig.cfi, pig.weight, pig.eat_count, pig.excrete_each_day, pig.excrete_count, pig.expose_count_per_day, pig.recover_count, pig.daily_co2_emission, pig.daily_ch4_emission, pig.cumulative_co2_emission, pig.cumulative_ch4_emission]
-				to: "../includes/output/dd/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
+				to: "../includes/output/dc/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
-			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/dd/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/dc/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
 		}
 
 	}
 
 //	reflex capture when: mod(cycle, speed) = 0 {
 //		ask simulations {
-//			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-simulator-" + string(cycle) + ".png";
-//			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-dfi-" + string(cycle) + ".png";
-//			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-weight-" + string(cycle) + ".png";
-//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
-//			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
-//			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
-//			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
-//			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/dd/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-simulator-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dfi-" + string(cycle) + ".png";
+//			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-weight-" + string(cycle) + ".png";
+//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/dc/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
 //		}
 //
 //	}

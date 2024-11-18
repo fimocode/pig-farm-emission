@@ -1,7 +1,7 @@
 model GasConcentration
 
 import './pig.gaml'
-import './pig-fixed-diet.gaml'
+import './pig.gaml'
 species Barn {
 	float co2_daily_avg; // (µg/min)
 	float ch4_daily_avg; // (µg/min)
@@ -27,13 +27,6 @@ species Barn {
 		ch4_daily_avg <- (pigList sum_of (each.daily_ch4_emission)) / 24 * 16666646.666707; // (µg/min)
 	}
 
-	action update_emissions_fixed_emission (list<PigFixedDiet> pigList) {
-		number_of_pigs <- float(length(pigList));
-		avg_weight_pig <- (pigList sum_of (each.weight)) / length(pigList);
-		co2_daily_avg <- (pigList sum_of (each.daily_co2_emission)) / 24 * 16666646.666707; // (µg/min)
-		ch4_daily_avg <- (pigList sum_of (each.daily_ch4_emission)) / 24 * 16666646.666707; // (µg/min)
-	}
-
 	float airflow {
 		if (avg_weight_pig < 40) {
 			return rnd(airflow[0], airflow[1]);
@@ -46,11 +39,11 @@ species Barn {
 		} }
 
 	float co2_concentration {
-		return (co2_daily_avg + co2_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 44.01; // PPM
+		return (co2_daily_avg + co2_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 44.01 with_precision 0; // PPM
 	}
 
 	float ch4_concentration {
-		return (ch4_daily_avg + ch4_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 16.04; // PPM
+		return (ch4_daily_avg + ch4_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 16.04 with_precision 0; // PPM
 	}
 
 	bool is_start_of_day {

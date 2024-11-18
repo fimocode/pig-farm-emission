@@ -11,7 +11,7 @@ global {
 	init {
 		file pigs <- csv_file("../includes/input/pigs.csv", true);
 		speed <- 45;
-		create Pig from: pigs;
+		create Pig from: pigs with: [feeding_regime::2];
 		create Barn number: 1;
 		create Trough number: 5;
 		loop i from: 0 to: 4 {
@@ -37,7 +37,7 @@ global {
 
 }
 
-experiment Normal {
+experiment NormalFixedDiet {
 	float co2_concentration <- 0.0;
 	float ch4_concentration <- 0.0;
 	rgb co2_color <- #green;

@@ -46,9 +46,6 @@ species Pig {
 	bool is_dead;
 
 	// Feed details
-	list<float> feed_starter_composition;
-	list<float> feed_grower_composition;
-	list<float> feed_finisher_composition;
 	list<float> feed_cp;
 	list<float> feed_me;
 	list<float> feed_ne;
@@ -59,6 +56,7 @@ species Pig {
 	float daily_ch4_emission; // Daily CH4 emission from fermentation (kg)
 	float cumulative_co2_emission; // Total CO2 emission (kg)
 	float cumulative_ch4_emission; // Total CH4 mission (kg)
+	int feeding_regime; // 1: phase based, 2: non-phase based
 	aspect base {
 		draw image("../includes/images/pig.png") size: 6.0;
 		draw string(id) color: #black size: 6;
@@ -67,9 +65,9 @@ species Pig {
 	init {
 		is_dead <- false;
 		location <- get_relax_loc();
-		a <- rnd(312.0, 328.0);
-		b <- rnd(0.0011448, 0.0013152);
-		fi <- 0.0;
+		//		a <- rnd(312.0, 328.0);
+		//		b <- rnd(0.0011448, 0.0013152);
+		//		fi <- 0.0;
 		init_weight <- get_init_weight();
 		weight <- init_weight;
 		target_dfi <- target_dfi();
@@ -81,17 +79,11 @@ species Pig {
 		excrete_each_day <- get_excrete_per_day();
 		current <- 0;
 		duration <- relax_time();
-
-		// feed composition calculator
-		file feed_composition_file <- csv_file("../includes/input/feed-composition.csv", true);
-		file feed_composition_data_file <- csv_file("../includes/input/feed-composition-data.csv", true);
-		feed_starter_composition <- (list(feed_composition_file.contents) copy_between (0, 13)) collect float(each);
-		feed_grower_composition <- (list(feed_composition_file.contents) copy_between (13, 26)) collect float(each);
-		feed_finisher_composition <- (list(feed_composition_file.contents) copy_between (26, 39)) collect float(each);
-		feed_me <- (list(feed_composition_data_file.contents) copy_between (1, 14)) collect float(each);
-		feed_ne <- (list(feed_composition_data_file.contents) copy_between (15, 28)) collect float(each);
-		feed_resD <- (list(feed_composition_data_file.contents) copy_between (29, 42)) collect float(each);
-		feed_cp <- (list(feed_composition_data_file.contents) copy_between (43, 56)) collect float(each);
+		feeding_regime <- 1;
+		feed_me <- [14.82, 14.77];
+		feed_ne <- [9.82, 9.85];
+		feed_cp <- [0.148, 0.132];
+		feed_resD <- [0.073663078, 0.08151072];
 		daily_co2_emission <- daily_co2_emission();
 		daily_ch4_emission <- daily_ch4_emission();
 		cumulative_co2_emission <- cumulative_co2_emission();
@@ -311,6 +303,7 @@ species Pig {
 		if (is_dead = true) {
 			return weight;
 		}
+
 		float Z <- 0.295 + 0.28 * #e ^ (-0.0402 * weight);
 		float D <- 0.11;
 		float P <- 0.0;
@@ -318,17 +311,8 @@ species Pig {
 		float Rp <- 0.0;
 		float Rl <- 0.0;
 		if (dfi != 0.0) {
-			if (weight <= 35) {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_starter_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_starter_composition[each] / 100 * feed_me[each]));
-			} else if (weight > 35 and weight <= 55) {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_grower_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_grower_composition[each] / 100 * feed_me[each]));
-			} else {
-				P <- sum(range(0, length(feed_cp) - 1) collect (feed_finisher_composition[each] / 100 * feed_cp[each] / 100));
-				Q <- sum(range(0, length(feed_me) - 1) collect (feed_finisher_composition[each] / 100 * feed_me[each]));
-			}
-
+			P <- feed_cp();
+			Q <- feed_me();
 			if (weight <= 100 and P > 0.11) {
 				Rp <- 0.11;
 				Rl <- (Q * dfi - (6.8 * (dfi * P - D / Z) + 0.475 * weight ^ 0.75 + 60 * D)) / 53.5;
@@ -336,9 +320,11 @@ species Pig {
 				Rp <- dfi * P * Z;
 				Rl <- (Q * dfi - (60 * dfi * P * Z + 0.475 * weight ^ 0.75)) / 53.5;
 			}
+
 		} else {
-			Rl <- (0 - 0.475 * weight^0.75) / 53.5;
+			Rl <- (0 - 0.475 * weight ^ 0.75) / 53.5;
 		}
+
 		float deltaWeight <- 1.082 * (4.4 * Rp + 1.1 * Rl);
 		return weight + deltaWeight with_precision 2;
 		//		return (init_weight + (a * (1 - e ^ (-b * (cfi + fi))))) with_precision 2;
@@ -349,47 +335,43 @@ species Pig {
      * Feed composition during phases calculators
      * *******************************
      */
+	float feed_me {
+		if feeding_regime = 1 {
+		// Theo phase
+			return weight <= 50 ? feed_me[0] : feed_me[1];
+		} else {
+		// Không đổi
+			return feed_me[0];
+		}
 
-// Starter phase
-	float me_starter_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_starter_composition[each] * dfi / 100));
 	}
 
-	float ne_starter_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_starter_composition[each] * dfi / 100));
+	float feed_ne {
+		if feeding_regime = 1 {
+			return weight <= 50 ? feed_ne[0] : feed_ne[1];
+		} else {
+			return feed_ne[0];
+		}
+
 	}
 
-	float resD_starter_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_starter_composition[each] * dfi / 100));
+	float feed_cp {
+		if feeding_regime = 1 {
+			return weight <= 50 ? feed_cp[0] : feed_cp[1];
+		} else {
+			return feed_cp[0];
+		}
+
 	}
 
-	// Grower phase
-	float me_grower_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_grower_composition[each] * dfi / 100));
-	}
+	float feed_resD {
+		if feeding_regime = 1 {
+			return weight <= 50 ? feed_resD[0] : feed_resD[1];
+		} else {
+			return feed_resD[0];
+		}
 
-	float ne_grower_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_grower_composition[each] * dfi / 100));
 	}
-
-	float resD_grower_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_grower_composition[each] * dfi / 100));
-	}
-
-	// Finisher phase
-	float me_finisher_phase {
-		return sum(range(0, length(feed_me) - 1) collect (feed_me[each] * feed_finisher_composition[each] * dfi / 100));
-	}
-
-	float ne_finisher_phase {
-		return sum(range(0, length(feed_ne) - 1) collect (feed_ne[each] * feed_finisher_composition[each] * dfi / 100));
-	}
-
-	float resD_finisher_phase {
-		return sum(range(0, length(feed_resD) - 1) collect (feed_resD[each] / 100 * feed_finisher_composition[each] * dfi / 100));
-	}
-
-	/*****/
 
 	/*****/
 	/**
@@ -397,27 +379,17 @@ species Pig {
      * *******************************
      */
 	float daily_co2_emission {
-		if (is_dead = true) { 
+		if (is_dead = true) {
 			return 0.0;
 		}
+
 		if dfi = 0.0 {
 			float heat_prod <- 750 * weight ^ 0.6;
 			return 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
 		}
 
-		float me <- 0.0;
-		float ne <- 0.0;
-		if (weight <= 35) {
-			me <- me_starter_phase();
-			ne <- ne_starter_phase();
-		} else if (weight > 35 and weight <= 55) {
-			me <- me_grower_phase();
-			ne <- ne_grower_phase();
-		} else {
-			me <- me_finisher_phase();
-			ne <- ne_finisher_phase();
-		}
-
+		float me <- feed_me();
+		float ne <- feed_ne();
 		float heat_prod <- 750 * weight ^ 0.6 + (1 - ne / me) * me * dfi;
 		return 24 * 0.163 * heat_prod / 1000 / 86.4 * 44 / 22.4 with_precision 4;
 	}
@@ -427,16 +399,7 @@ species Pig {
 			return 0.0;
 		}
 
-		float resD <- 0.0;
-		if (weight <= 35.0) {
-			resD <- resD_starter_phase();
-		} else if (weight > 35.0 and weight <= 55.0) {
-			resD <- resD_grower_phase();
-		} else {
-			resD <- resD_finisher_phase();
-		}
-
-		return resD * dfi * 670 / 1000 / 56.65 with_precision 4;
+		return feed_resD() * dfi * 670 / 1000 / 56.65 with_precision 4;
 	}
 
 	float cumulative_co2_emission {
@@ -454,13 +417,10 @@ species Pig {
 
 		return (cumulative_ch4_emission + daily_ch4_emission) with_precision 4;
 	}
-	
+
 	action get_daily_emission_for_barn {
-		return [
-			'daily_co2_emission'::daily_co2_emission,
-			'daily_ch4_emission'::daily_ch4_emission
-		];
-	} 
+		return ['daily_co2_emission'::daily_co2_emission, 'daily_ch4_emission'::daily_ch4_emission];
+	}
 
 	/*****/
 

@@ -1,15 +1,4 @@
-/**
-* Name: TransmitDiseasePig
-*  
-* Author: Lê Đức Toàn
-* Tags: 
-*/
-
-
 model TransmitDiseasePig
-
-/* Insert your model definition here */
-
 
 import './disease-pig.gaml'
 import './transmit-disease-factor.gaml'

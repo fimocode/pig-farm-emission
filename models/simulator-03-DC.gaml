@@ -12,7 +12,7 @@ global {
 	init {
 		pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
 		speed <- 45;
-		create FoodDiseasePigDC from: pigs;
+		create FoodDiseasePigDC from: pigs with: [feeding_regime::1];
 		create Trough number: 5;
 		create Barn number: 1;
 		loop i from: 0 to: 4 {
