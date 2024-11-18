@@ -1,7 +1,7 @@
 model Simulator
 
 import './farm.gaml'
-import './pig-fixed-diet.gaml'
+import './pig.gaml'
 import './gas-concentration.gaml'
 
 global {
@@ -11,7 +11,7 @@ global {
 	init {
 		file pigs <- csv_file("../includes/input/pigs.csv", true);
 		speed <- 45;
-		create PigFixedDiet from: pigs;
+		create Pig from: pigs with: [feeding_regime::1];
 		create Barn number: 1;
 		create Trough number: 5;
 		loop i from: 0 to: 4 {
@@ -19,14 +19,14 @@ global {
 		}
 
 		ask Barn {
-			do update_emissions_fixed_emission(list(PigFixedDiet));
+			do update_emissions(list(Pig));
 		}
 
 	}
 
 	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
 		ask Barn {
-			do update_emissions_fixed_emission(list(PigFixedDiet));
+			do update_emissions(list(Pig));
 		}
 
 	}
@@ -37,7 +37,7 @@ global {
 
 }
 
-experiment NormalFixedDiet {
+experiment Normal {
 	float co2_concentration <- 0.0;
 	float ch4_concentration <- 0.0;
 	rgb co2_color <- #green;
@@ -45,9 +45,9 @@ experiment NormalFixedDiet {
 	int current_day <- -1;
 	parameter "Experiment ID" var: experiment_id <- "";
 	output {
-		display Simulator name: "Simulator" refresh: every((60 * 24) #cycles) {
+		display Simulator name: "Simulator" {
 			grid Background;
-			species PigFixedDiet aspect: base;
+			species Pig aspect: base;
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
 				int new_day <- floor(cycle / (24 * 60));
 				if (new_day != current_day) {
@@ -67,7 +67,7 @@ experiment NormalFixedDiet {
 
 		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
 			chart "DFI" type: series {
-				loop pig over: PigFixedDiet {
+				loop pig over: Pig {
 					data string(pig.id) value: pig.dfi;
 				}
 
@@ -77,7 +77,7 @@ experiment NormalFixedDiet {
 
 		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
 			chart "Weight" type: histogram {
-				loop pig over: PigFixedDiet {
+				loop pig over: Pig {
 					data string(pig.id) value: pig.weight;
 				}
 
@@ -102,7 +102,7 @@ experiment NormalFixedDiet {
 		//		}
 		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CO2 emission (kg)" type: series {
-				loop pig over: PigFixedDiet {
+				loop pig over: Pig {
 					data string(pig.id) value: pig.daily_co2_emission;
 				}
 
@@ -112,7 +112,7 @@ experiment NormalFixedDiet {
 
 		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
 			chart "Daily CH4 emission (kg)" type: series {
-				loop pig over: PigFixedDiet {
+				loop pig over: Pig {
 					data string(pig.id) value: pig.daily_ch4_emission;
 				}
 
@@ -122,14 +122,14 @@ experiment NormalFixedDiet {
 
 		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Total cumulative CO2 emission (kg)" type: series {
-				data "CO2" value: PigFixedDiet sum_of (each.cumulative_co2_emission) color: #blue;
+				data "CO2" value: Pig sum_of (each.cumulative_co2_emission) color: #blue;
 			}
 
 		}
 
 		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
 			chart "Total cumulative CH4 emission (kg)" type: series {
-				data "CH4" value: PigFixedDiet sum_of (each.cumulative_ch4_emission) color: #red;
+				data "CH4" value: Pig sum_of (each.cumulative_ch4_emission) color: #red;
 			}
 
 		}
@@ -138,33 +138,32 @@ experiment NormalFixedDiet {
 
 	reflex log when: mod(cycle, 24 * 60) = 0 {
 		ask simulations {
-			float total_CO2_emission <- PigFixedDiet sum_of (each.cumulative_co2_emission);
-			float total_CH4_emission <- PigFixedDiet sum_of (each.cumulative_ch4_emission);
-			loop pig over: PigFixedDiet {
+			float total_CO2_emission <- Pig sum_of (each.cumulative_co2_emission);
+			float total_CH4_emission <- Pig sum_of (each.cumulative_ch4_emission);
+			loop pig over: Pig {
 				save
 				[floor(cycle / (24 * 60)), pig.id, pig.target_dfi, pig.dfi, pig.target_cfi, pig.cfi, pig.weight, pig.eat_count, pig.excrete_each_day, pig.excrete_count, pig.daily_co2_emission, pig.daily_ch4_emission, pig.cumulative_co2_emission, pig.cumulative_ch4_emission]
-				to: "../includes/output/normal-fixed-diet/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
+				to: "../includes/output/normal/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
-			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal-fixed-diet/" + experiment_id + "-emission" + ".csv" rewrite: false
-			format: "csv";
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
 		}
 
 	}
 
-	reflex capture when: mod(cycle, speed) = 0 {
-		ask simulations {
-			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-simulator-" + string(cycle) + ".png";
-			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-dfi-" + string(cycle) + ".png";
-			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-weight-" + string(cycle) + ".png";
-			//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
-			//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
-			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
-			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
-			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/normal-fixed-diet/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
-		}
-
-	}
+//	reflex capture when: mod(cycle, speed) = 0 {
+//		ask simulations {
+//			save (snapshot(self, "Simulator", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-simulator-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFI", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfi-" + string(cycle) + ".png";
+//			save (snapshot(self, "Weight", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-weight-" + string(cycle) + ".png";
+//			save (snapshot(self, "CFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-cfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DFIPig0", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dfipig0-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailyco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "DailyCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-dailych4emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCO2Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalco2emission-" + string(cycle) + ".png";
+//			save (snapshot(self, "TotalCH4Emission", {500.0, 500.0})) to: "../includes/output/normal/" + experiment_id + "-totalch4emission-" + string(cycle) + ".png";
+//		}
+//
+//	}
 
 }
