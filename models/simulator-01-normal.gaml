@@ -65,25 +65,25 @@ experiment Normal {
 
 		}
 
-		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
-			chart "DFI" type: series {
-				loop pig over: Pig {
-					data string(pig.id) value: pig.dfi;
-				}
-
-			}
-
-		}
-
-		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
-			chart "Weight" type: histogram {
-				loop pig over: Pig {
-					data string(pig.id) value: pig.weight;
-				}
-
-			}
-
-		}
+//		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
+//			chart "DFI" type: series {
+//				loop pig over: Pig {
+//					data string(pig.id) value: pig.dfi;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
+//			chart "Weight" type: histogram {
+//				loop pig over: Pig {
+//					data string(pig.id) value: pig.weight;
+//				}
+//
+//			}
+//
+//		}
 
 		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
 		//			chart "CFI vs Target CFI" type: series {
@@ -100,39 +100,39 @@ experiment Normal {
 		//			}
 		//
 		//		}
-		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
-			chart "Daily CO2 emission (kg)" type: series {
-				loop pig over: Pig {
-					data string(pig.id) value: pig.daily_co2_emission;
-				}
-
-			}
-
-		}
-
-		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
-			chart "Daily CH4 emission (kg)" type: series {
-				loop pig over: Pig {
-					data string(pig.id) value: pig.daily_ch4_emission;
-				}
-
-			}
-
-		}
-
-		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
-			chart "Total cumulative CO2 emission (kg)" type: series {
-				data "CO2" value: Pig sum_of (each.cumulative_co2_emission) color: #blue;
-			}
-
-		}
-
-		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
-			chart "Total cumulative CH4 emission (kg)" type: series {
-				data "CH4" value: Pig sum_of (each.cumulative_ch4_emission) color: #red;
-			}
-
-		}
+//		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Daily CO2 emission (kg)" type: series {
+//				loop pig over: Pig {
+//					data string(pig.id) value: pig.daily_co2_emission;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Daily CH4 emission (kg)" type: series {
+//				loop pig over: Pig {
+//					data string(pig.id) value: pig.daily_ch4_emission;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Total cumulative CO2 emission (kg)" type: series {
+//				data "CO2" value: Pig sum_of (each.cumulative_co2_emission) color: #blue;
+//			}
+//
+//		}
+//
+//		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Total cumulative CH4 emission (kg)" type: series {
+//				data "CH4" value: Pig sum_of (each.cumulative_ch4_emission) color: #red;
+//			}
+//
+//		}
 
 	}
 

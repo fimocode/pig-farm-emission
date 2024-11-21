@@ -143,10 +143,10 @@ experiment NormalFixedDiet {
 			loop pig over: Pig {
 				save
 				[floor(cycle / (24 * 60)), pig.id, pig.target_dfi, pig.dfi, pig.target_cfi, pig.cfi, pig.weight, pig.eat_count, pig.excrete_each_day, pig.excrete_count, pig.daily_co2_emission, pig.daily_ch4_emission, pig.cumulative_co2_emission, pig.cumulative_ch4_emission]
-				to: "../includes/output/normal/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
+				to: "../includes/output/normal-fixeddiet/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
-			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/normal-fixeddiet/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
 		}
 
 	}
