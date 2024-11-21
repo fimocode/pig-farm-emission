@@ -120,14 +120,6 @@ experiment CC {
 
 		}
 
-		display TotalEmission name: "TotalEmission" refresh: every((60 * 24) #cycles) {
-			chart "Total cumulative emission (kg)" type: series {
-				data "CO2" value: FoodDiseasePigCC sum_of (each.cumulative_co2_emission) color: #blue;
-				data "CH4" value: FoodDiseasePigCC sum_of (each.cumulative_ch4_emission) color: #red;
-			}
-
-		}
-
 		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
 			chart "Total cumulative CO2 emission (kg)" type: series {
 				data "CO2" value: FoodDiseasePigCC sum_of (each.cumulative_co2_emission) color: #blue;
