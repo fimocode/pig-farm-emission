@@ -79,7 +79,7 @@ species Pig {
 		excrete_each_day <- get_excrete_per_day();
 		current <- 0;
 		duration <- relax_time();
-		feeding_regime <- 1;
+//		feeding_regime <- 1;
 		feed_me <- [14.82, 14.77, 13.9];
 		feed_ne <- [9.82, 9.85, 10.37];
 		feed_cp <- [0.148, 0.132, 0.168];
@@ -140,7 +140,7 @@ species Pig {
 
 	float get_init_weight {
 		return rnd(47.5, 52.5) with_precision 2;
-//		return rnd(20.0, 25.0) with_precision 2;
+		//		return rnd(20.0, 25.0) with_precision 2;
 	}
 	/*****/
 
