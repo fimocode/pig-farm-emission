@@ -80,10 +80,10 @@ species Pig {
 		current <- 0;
 		duration <- relax_time();
 		feeding_regime <- 1;
-		feed_me <- [14.82, 14.77];
-		feed_ne <- [9.82, 9.85];
-		feed_cp <- [0.148, 0.132];
-		feed_resD <- [0.073663078, 0.08151072];
+		feed_me <- [14.82, 14.77, 13.9];
+		feed_ne <- [9.82, 9.85, 10.37];
+		feed_cp <- [0.148, 0.132, 0.168];
+		feed_resD <- [0.073663078, 0.08151072, 0.0942711];
 		daily_co2_emission <- daily_co2_emission();
 		daily_ch4_emission <- daily_ch4_emission();
 		cumulative_co2_emission <- cumulative_co2_emission();
@@ -139,7 +139,8 @@ species Pig {
 	}
 
 	float get_init_weight {
-		return rnd(20.0, 25.0) with_precision 2;
+		return rnd(47.5, 52.5) with_precision 2;
+//		return rnd(20.0, 25.0) with_precision 2;
 	}
 	/*****/
 
@@ -338,37 +339,37 @@ species Pig {
 	float feed_me {
 		if feeding_regime = 1 {
 		// Theo phase
-			return weight <= 50 ? feed_me[0] : feed_me[1];
+			return weight <= 65 ? feed_me[0] : feed_me[1];
 		} else {
 		// Không đổi
-			return feed_me[0];
+			return feed_me[2];
 		}
 
 	}
 
 	float feed_ne {
 		if feeding_regime = 1 {
-			return weight <= 50 ? feed_ne[0] : feed_ne[1];
+			return weight <= 65 ? feed_ne[0] : feed_ne[1];
 		} else {
-			return feed_ne[0];
+			return feed_ne[2];
 		}
 
 	}
 
 	float feed_cp {
 		if feeding_regime = 1 {
-			return weight <= 50 ? feed_cp[0] : feed_cp[1];
+			return weight <= 65 ? feed_cp[0] : feed_cp[1];
 		} else {
-			return feed_cp[0];
+			return feed_cp[2];
 		}
 
 	}
 
 	float feed_resD {
 		if feeding_regime = 1 {
-			return weight <= 50 ? feed_resD[0] : feed_resD[1];
+			return weight <= 65 ? feed_resD[0] : feed_resD[1];
 		} else {
-			return feed_resD[0];
+			return feed_resD[2];
 		}
 
 	}

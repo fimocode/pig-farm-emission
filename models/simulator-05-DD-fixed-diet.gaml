@@ -150,7 +150,7 @@ experiment DDFixedDiet {
 				to: "../includes/output/dd-fixeddiet/" + experiment_id + "-" + string(pig.id) + ".csv" rewrite: false format: "csv";
 			}
 
-			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/dd-fixeddiet/" + experiment_id + "-emission" + ".csv" rewrite: false format: "csv";
+			save [floor(cycle / (24 * 60)), total_CO2_emission, total_CH4_emission] to: "../includes/output/dd-fixeddiet/" + experiment_id + "-emission-fixeddiet" + ".csv" rewrite: false format: "csv";
 		}
 
 	}

@@ -29,13 +29,13 @@ species Barn {
 
 	float airflow {
 		if (avg_weight_pig < 40) {
-			return rnd(airflow[0], airflow[1]);
+			return rnd(airflow[0], airflow[1]) * 20;
 		} else if (avg_weight_pig >= 40 and avg_weight_pig < 60) {
-			return rnd(airflow[1], airflow[2]);
+			return rnd(airflow[1], airflow[2]) * 20;
 		} else if (avg_weight_pig >= 60 and avg_weight_pig < 80) {
-			return rnd(airflow[2], airflow[3]);
+			return rnd(airflow[2], airflow[3]) * 20;
 		} else {
-			return airflow[3];
+			return airflow[3] * 20;
 		} }
 
 	float co2_concentration {
