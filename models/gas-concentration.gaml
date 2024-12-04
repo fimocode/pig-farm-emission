@@ -2,7 +2,7 @@ model GasConcentration
 
 import './pig.gaml'
 import './pig.gaml'
-species Barn {
+species Pigpen {
 	float co2_daily_avg; // (µg/min)
 	float ch4_daily_avg; // (µg/min)
 	float v_barn;

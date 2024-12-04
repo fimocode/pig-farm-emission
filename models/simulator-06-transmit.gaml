@@ -13,13 +13,13 @@ global {
 		pigs <- csv_file("../includes/input/transmit-disease-pigs.csv", true);
 		speed <- 45;
 		create TransmitDiseasePig from: pigs with: [feeding_regime::1];
-		create Barn number: 1;
+		create Pigpen number: 1;
 		create Trough number: 5;
 		loop i from: 0 to: 4 {
 			Trough[i].location <- trough_locs[i];
 		}
 
-		ask Barn {
+		ask Pigpen {
 			do update_emissions(list(TransmitDiseasePig));
 		}
 
@@ -28,7 +28,7 @@ global {
 	}
 
 	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
-		ask Barn {
+		ask Pigpen {
 			do update_emissions(list(TransmitDiseasePig));
 		}
 
@@ -54,8 +54,8 @@ experiment Transmit {
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
 				int new_day <- floor(cycle / (24 * 60));
 				if (new_day != current_day) {
-					co2_concentration <- Barn(0).co2_concentration();
-					ch4_concentration <- Barn(0).ch4_concentration();
+					co2_concentration <- Pigpen(0).co2_concentration();
+					ch4_concentration <- Pigpen(0).ch4_concentration();
 					co2_color <- (co2_concentration > 1500) ? #red : #green;
 					ch4_color <- (ch4_concentration > 500) ? #red : #green;
 					current_day <- new_day;
@@ -67,75 +67,75 @@ experiment Transmit {
 			}
 
 		}
-
-		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
-			chart "DFI" type: series {
-				loop pig over: TransmitDiseasePig {
-					data string(pig.id) value: pig.dfi;
-				}
-
-			}
-
-		}
-
-		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
-			chart "Weight" type: histogram {
-				loop pig over: TransmitDiseasePig {
-					data string(pig.id) value: pig.weight;
-				}
-
-			}
-
-		}
-
-		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
-		//			chart "CFI vs Target CFI" type: series {
-		//				data 'CFI' value: TransmitDiseasePig[0].cfi;
-		//				data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
-		//			}
-		//
-		//		}
-		//
-		//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
-		//			chart "DFI vs Target DFI" type: series {
-		//				data 'DFI' value: TransmitDiseasePig[0].dfi;
-		//				data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
-		//			}
-		//
-		//		}
-		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
-			chart "Daily CO2 emission (kg)" type: series {
-				loop pig over: TransmitDiseasePig {
-					data string(pig.id) value: pig.daily_co2_emission;
-				}
-
-			}
-
-		}
-
-		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
-			chart "Daily CH4 emission (kg)" type: series {
-				loop pig over: TransmitDiseasePig {
-					data string(pig.id) value: pig.daily_ch4_emission;
-				}
-
-			}
-
-		}
-
-		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
-			chart "Total cumulative CO2 emission (kg)" type: series {
-				data "CO2" value: TransmitDiseasePig sum_of (each.cumulative_co2_emission) color: #blue;
-			}
-
-		}
-
-		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
-			chart "Total cumulative CH4 emission (kg)" type: series {
-				data "CH4" value: TransmitDiseasePig sum_of (each.cumulative_ch4_emission) color: #red;
-			}
-
-		}
+//
+//		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
+//			chart "DFI" type: series {
+//				loop pig over: TransmitDiseasePig {
+//					data string(pig.id) value: pig.dfi;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
+//			chart "Weight" type: histogram {
+//				loop pig over: TransmitDiseasePig {
+//					data string(pig.id) value: pig.weight;
+//				}
+//
+//			}
+//
+//		}
+//
+//		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
+//		//			chart "CFI vs Target CFI" type: series {
+//		//				data 'CFI' value: TransmitDiseasePig[0].cfi;
+//		//				data 'Target CFI' value: TransmitDiseasePig[0].target_cfi;
+//		//			}
+//		//
+//		//		}
+//		//
+//		//		display DFIPig0 name: "DFIPig0" refresh: every((60 * 24) #cycles) {
+//		//			chart "DFI vs Target DFI" type: series {
+//		//				data 'DFI' value: TransmitDiseasePig[0].dfi;
+//		//				data 'Target DFI' value: TransmitDiseasePig[0].target_dfi;
+//		//			}
+//		//
+//		//		}
+//		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Daily CO2 emission (kg)" type: series {
+//				loop pig over: TransmitDiseasePig {
+//					data string(pig.id) value: pig.daily_co2_emission;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Daily CH4 emission (kg)" type: series {
+//				loop pig over: TransmitDiseasePig {
+//					data string(pig.id) value: pig.daily_ch4_emission;
+//				}
+//
+//			}
+//
+//		}
+//
+//		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Total cumulative CO2 emission (kg)" type: series {
+//				data "CO2" value: TransmitDiseasePig sum_of (each.cumulative_co2_emission) color: #blue;
+//			}
+//
+//		}
+//
+//		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
+//			chart "Total cumulative CH4 emission (kg)" type: series {
+//				data "CH4" value: TransmitDiseasePig sum_of (each.cumulative_ch4_emission) color: #red;
+//			}
+//
+//		}
 
 	}
 

@@ -13,13 +13,13 @@ global {
 		pigs <- csv_file("../includes/input/food-disease-pigs.csv", true);
 		speed <- 45;
 		create FoodDiseasePigDD from: pigs with: [feeding_regime::1];
-		create Barn number: 1;
+		create Pigpen number: 1;
 		create Trough number: 5;
 		loop i from: 0 to: 4 {
 			Trough[i].location <- trough_locs[i];
 		}
 
-		ask Barn {
+		ask Pigpen {
 			do update_emissions(list(FoodDiseasePigDD));
 		}
 
@@ -29,7 +29,7 @@ global {
 	}
 
 	reflex update_concentration when: mod(cycle, 24 * 60) = 0 {
-		ask Barn {
+		ask Pigpen {
 			do update_emissions(list(FoodDiseasePigDD));
 		}
 
@@ -55,8 +55,8 @@ experiment DD {
 			overlay position: {2, 2} size: {10, 5} background: #black transparency: 1 {
 				int new_day <- floor(cycle / (24 * 60));
 				if (new_day != current_day) {
-					co2_concentration <- Barn(0).co2_concentration();
-					ch4_concentration <- Barn(0).ch4_concentration();
+					co2_concentration <- Pigpen(0).co2_concentration();
+					ch4_concentration <- Pigpen(0).ch4_concentration();
 					co2_color <- (co2_concentration > 1500) ? #red : #green;
 					ch4_color <- (ch4_concentration > 500) ? #red : #green;
 					current_day <- new_day;
