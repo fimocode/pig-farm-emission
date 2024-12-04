@@ -5,7 +5,7 @@ import './pig.gaml'
 species Pigpen {
 	float co2_daily_avg; // (µg/min)
 	float ch4_daily_avg; // (µg/min)
-	float v_barn;
+	float v_pen;
 	float co2_concentration_in_air; // (µg/m3)
 	float ch4_concentration_in_air; // (µg/m3)
 	float avg_weight_pig;
@@ -14,7 +14,7 @@ species Pigpen {
 	float ch4_concentration; // (µg/m3)
 	list<float> airflow; // m3/min
 	init {
-		v_barn <- 100.0; // m3
+		v_pen <- 100.0; // m3
 		co2_concentration_in_air <- 795604.0; // (µg/m3)
 		ch4_concentration_in_air <- 1261.0; // (µg/m3)
 		airflow <- [4.56, 5.7, 6.84, 7.62]; // m3/min
@@ -39,11 +39,11 @@ species Pigpen {
 		} }
 
 	float co2_concentration {
-		return (co2_daily_avg + co2_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 44.01 with_precision 0; // PPM
+		return (co2_daily_avg + co2_concentration_in_air * airflow() - v_pen) / airflow() * 0.001 * 24.45 / 44.01 with_precision 0; // PPM
 	}
 
 	float ch4_concentration {
-		return (ch4_daily_avg + ch4_concentration_in_air * airflow() - v_barn) / airflow() * 0.001 * 24.45 / 16.04 with_precision 0; // PPM
+		return (ch4_daily_avg + ch4_concentration_in_air * airflow() - v_pen) / airflow() * 0.001 * 24.45 / 16.04 with_precision 0; // PPM
 	}
 
 	bool is_start_of_day {
