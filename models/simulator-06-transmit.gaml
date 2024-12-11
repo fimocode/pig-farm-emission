@@ -61,33 +61,33 @@ experiment Transmit {
 					current_day <- new_day;
 				}
 
-				draw "Day " + current_day color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				draw "Day " + current_day color: #black at: {0, 20} font: font("Arial", 14, #plain);
+				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {0, 60} color: co2_color font: font("Arial", 14, #plain);
+				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {0, 90} color: ch4_color font: font("Arial", 14, #plain);
 			}
 
 		}
-//
-//		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
-//			chart "DFI" type: series {
-//				loop pig over: TransmitDiseasePig {
-//					data string(pig.id) value: pig.dfi;
-//				}
-//
-//			}
-//
-//		}
-//
-//		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
-//			chart "Weight" type: histogram {
-//				loop pig over: TransmitDiseasePig {
-//					data string(pig.id) value: pig.weight;
-//				}
-//
-//			}
-//
-//		}
-//
+
+		display DFI name: "DFI" refresh: every((60 * 24) #cycles) {
+			chart "DFI" type: series {
+				loop pig over: TransmitDiseasePig {
+					data string(pig.id) value: pig.dfi;
+				}
+
+			}
+
+		}
+
+		display Weight name: "Weight" refresh: every((60 * 24) #cycles) {
+			chart "Weight" type: histogram {
+				loop pig over: TransmitDiseasePig {
+					data string(pig.id) value: pig.weight;
+				}
+
+			}
+
+		}
+
 //		//		display CFIPig0 name: "CFIPig0" refresh: every((60 * 24) #cycles) {
 //		//			chart "CFI vs Target CFI" type: series {
 //		//				data 'CFI' value: TransmitDiseasePig[0].cfi;
@@ -103,39 +103,39 @@ experiment Transmit {
 //		//			}
 //		//
 //		//		}
-//		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
-//			chart "Daily CO2 emission (kg)" type: series {
-//				loop pig over: TransmitDiseasePig {
-//					data string(pig.id) value: pig.daily_co2_emission;
-//				}
-//
-//			}
-//
-//		}
-//
-//		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
-//			chart "Daily CH4 emission (kg)" type: series {
-//				loop pig over: TransmitDiseasePig {
-//					data string(pig.id) value: pig.daily_ch4_emission;
-//				}
-//
-//			}
-//
-//		}
-//
-//		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
-//			chart "Total cumulative CO2 emission (kg)" type: series {
-//				data "CO2" value: TransmitDiseasePig sum_of (each.cumulative_co2_emission) color: #blue;
-//			}
-//
-//		}
-//
-//		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
-//			chart "Total cumulative CH4 emission (kg)" type: series {
-//				data "CH4" value: TransmitDiseasePig sum_of (each.cumulative_ch4_emission) color: #red;
-//			}
-//
-//		}
+		display DailyCO2Emission name: "DailyCO2Emission" refresh: every((60 * 24) #cycles) {
+			chart "Daily CO2 emission (kg)" type: series {
+				loop pig over: TransmitDiseasePig {
+					data string(pig.id) value: pig.daily_co2_emission;
+				}
+
+			}
+
+		}
+
+		display DailyCH4Emission name: "DailyCH4Emission" refresh: every((60 * 24) #cycles) {
+			chart "Daily CH4 emission (kg)" type: series {
+				loop pig over: TransmitDiseasePig {
+					data string(pig.id) value: pig.daily_ch4_emission;
+				}
+
+			}
+
+		}
+
+		display TotalCO2Emission name: "TotalCO2Emission" refresh: every((60 * 24) #cycles) {
+			chart "Total cumulative CO2 emission (kg)" type: series {
+				data "CO2" value: TransmitDiseasePig sum_of (each.cumulative_co2_emission) color: #blue;
+			}
+
+		}
+
+		display TotalCH4Emission name: "TotalCH4Emission" refresh: every((60 * 24) #cycles) {
+			chart "Total cumulative CH4 emission (kg)" type: series {
+				data "CH4" value: TransmitDiseasePig sum_of (each.cumulative_ch4_emission) color: #red;
+			}
+
+		}
 
 	}
 

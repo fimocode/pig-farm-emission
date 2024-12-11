@@ -61,9 +61,9 @@ experiment DC {
 					current_day <- new_day;
 				}
 
-				draw "Day " + current_day color: #black at: {0, 2} font: font("Arial", 18, #plain);
-				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {2, 25} color: co2_color font: font("Arial", 16, #plain);
-				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {2, 50} color: ch4_color font: font("Arial", 16, #plain);
+				draw "Day " + current_day color: #black at: {0, 20} font: font("Arial", 14, #plain);
+				draw "CO2 level: " + co2_concentration with_precision 0 + " PPM" at: {0, 60} color: co2_color font: font("Arial", 14, #plain);
+				draw "CH4 level: " + ch4_concentration with_precision 0 + " PPM" at: {0, 90} color: ch4_color font: font("Arial", 14, #plain);
 			}
 
 		}

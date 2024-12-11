@@ -74,7 +74,7 @@ species DiseasePig parent: Pig {
 			draw string(id) color: #black size: 5;
 		} }
 
-		/**
+	/**
 	 * DFI, CFI and Weight
 	 */
 	float resistance {
